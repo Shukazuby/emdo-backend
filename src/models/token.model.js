@@ -18,7 +18,6 @@ module.exports = (sequelize, dataType) => {
     },
     expires: {
       type: dataType.DATE,
-      allowNull: false,
     },
     blacklisted: {
       type: dataType.BOOLEAN,

@@ -66,7 +66,6 @@ module.exports = (sequelize, dataType) => {
       type: dataType.STRING,
       trim: true,
     },
-
   });
 
   return user;

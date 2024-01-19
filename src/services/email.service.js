@@ -3,7 +3,7 @@ const config = require('../config/config');
 const logger = require('../config/logger');
 
 const transport = nodemailer.createTransport(config.email.smtp);
-/* istanbul ignore next */
+
 if (config.env !== 'test') {
   transport
     .verify()
@@ -39,6 +39,25 @@ If you did not request any password resets, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
+// const employerEmailToken = async (to, otp, doctorID, doctorName, companyName) => {
+//     const subject = `Welcome to ${companyName}`;
+//     // replace this url with the link to the email verification page of your front-end app
+//     const otpDetails = `email: ${to}
+  
+//                               otp:${otp}`;
+  
+//       const otpLink = 'https://bitmedics-app.vercel.app/signin'
+  
+//     const text = `To verify your email use the details
+    
+//     Here is the details 
+//     ${otpDetails}
+  
+//     Login here: ${otpLink}`;
+//     await sendEmail(to, subject, text);
+//   };
+  
+
 /**
  * Send verification email
  * @param {string} to
@@ -48,9 +67,9 @@ If you did not request any password resets, then ignore this email.`;
 const sendVerificationEmail = async (to, token) => {
   const subject = 'Email Verification';
   // replace this url with the link to the email verification page of your front-end app
-  const verificationEmailUrl = `localhost:5000/v1/auth/verify-email?token=${token}`;
+  // const verificationEmailUrl = `localhost:5000/v1/auth/verify-email?token=${token}`;
   const text = `Dear user,
-To verify your email, click on this link: ${verificationEmailUrl}
+To verify your email, use this token ${token}
 If you did not create an account, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
@@ -61,4 +80,5 @@ module.exports = {
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
+//   employerEmailToken
 };

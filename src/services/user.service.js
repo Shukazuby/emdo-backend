@@ -43,8 +43,58 @@ const createUser = async (userType, userBody) => {
   });
 };
 
+/**
+ * Get user by email
+ * @param {string} email
+ * @returns {Promise<User>}
+ */
+const getUserByEmail = async (email) => {
+    return db.users.findOne({ where: { email }, 
+      include:[{
+      model: db.employers
+    },
+  ] });
+  };
+
+  const getUserById = async (id) => {
+    return db.users.findByPk(id);
+  };
+  
+
+  const updateUserById = async (userId, updateBody) => {
+    const user = await getUserById(userId);
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+    if (updateBody.email && (await isEmailTaken(updateBody.email, userId))) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    }
+    Object.assign(user, updateBody);
+    await user.update(updateBody);
+    return user;
+  };
+  
+  /**
+   * Delete user by id
+   * @param {ObjectId} userId
+   * @returns {Promise<User>}
+   */
+  const deleteUserById = async (userId) => {
+    const user = await getUserById(userId);
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+    await db.users.destroy(user);
+    return user;
+  };
+  
+  
 module.exports = {
     isEmailTaken,
     isPasswordMatch,
-    createUser
+    createUser,
+    getUserByEmail,
+    getUserById,
+    updateUserById,
+    deleteUserById,
 }
