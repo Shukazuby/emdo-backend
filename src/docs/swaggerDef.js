@@ -4,7 +4,7 @@ const config = require('../config/config');
 const swaggerDef = {
   openapi: '3.0.0',
   info: {
-    title: 'emdo API documentation',
+    title: 'emdo',
     version,
     license: {
       name: 'MIT',

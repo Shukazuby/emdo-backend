@@ -29,7 +29,17 @@ const createEmployer = async (employerBody) => {
 };
 
 /**
- * creates a employer
+ * creates a employee
+ * @param {Object} hospitalBody
+ * @returns {Promise<Object>}
+ */
+const createEmployee = async (employeeBody) => {
+  return db.employers.create(employeeBody);
+};
+
+
+/**
+ * creates a user
  * @param {Object} userBody
  * @returns {Promise<Object>}
  */
@@ -38,7 +48,7 @@ const registerUser = async (userBody) => {
 };
 
 /**
- * Login with username and password
+ * Login with email and password
  * @param {string} email
  * @param {string} password
  * @returns {Promise<User>}
@@ -158,6 +168,7 @@ const verifyEmail = async (verifyEmailToken) => {
 
 module.exports = {
   createEmployer,
+  createEmployee,
   registerUser,
   loginUserWithEmailAndPassword,
   logout,

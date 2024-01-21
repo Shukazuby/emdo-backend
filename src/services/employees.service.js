@@ -4,26 +4,25 @@ const { db } = require('../models');
 
 /**
  * creates a subject
- * @param {Object} employerBody
+ * @param {Object} employeeBody
  * @returns {Promise<Object>}
  */
-const createEmployer = async (id, employerBody) => {
-
+const createEmployee = async (id, employeeBody) => {
   const user = await db.users.findOne({
     where:{
       id
     }
   })
-  const employer = db.employers.create({
-    ...employerBody,
+  const employee = db.employees.create({
+    ...employeeBody,
     userId: user.id
   });
-  if(!employer){
+  if(!employee){
     throw new ApiError(httpStatus.NOT_FOUND, 'employer not found')
   }
-  return employer;
+  return employee;
 };
 
 module.exports ={
-    createEmployer
+    createEmployee
 }

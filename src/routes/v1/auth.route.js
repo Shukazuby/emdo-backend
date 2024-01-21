@@ -5,6 +5,7 @@ const authController = require('../../controllers/auth.controller');
 const router = express.Router();
 
 router.post('/employers/register', authController.createEmployer);
+router.post('/employees/register', authController.createEmployee);
 router.post('/login',authController.login);
 router.post('/reset',authController.resetPassword);
 router.post('/forget',authController.forgotPassword);
@@ -201,12 +202,19 @@ module.exports = router;
  *   post:
  *     summary: verify email
  *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *             example:
+ *               token: 3678
  *         description: The verify email token
  *     responses:
  *       "204":

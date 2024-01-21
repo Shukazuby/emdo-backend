@@ -8,11 +8,12 @@ const {
   tokenService,
   emailService,
   employerService,
+  employeeService,
 } = require("../services");
 
 const createEmployer = catchAsync(async (req, res) => {
   const user = await userService.createUser("employer", req.body);
-  const employer = await employerService.createEmployer(req.body);
+  const employer = await employerService.createEmployer(user.id, req.body);
   const verifyEmailToken = await tokenService.generateVerifyEmailToken(
     user.dataValues
   );
@@ -24,6 +25,22 @@ const createEmployer = catchAsync(async (req, res) => {
     employer,
   });
 });
+
+const createEmployee = catchAsync(async (req, res) => {
+  const user = await userService.createUser("employee", req.body);
+  const employee = await employeeService.createEmployee(user.id,req.body);
+  const verifyEmailToken = await tokenService.generateVerifyEmailToken(
+    user.dataValues
+  );
+  await emailService.sendVerificationEmail(user.email, verifyEmailToken);
+
+  res.status(httpStatus.CREATED).send({
+    message: "Employee registered successfully",
+    user: user,
+    employee,
+  });
+});
+
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -69,6 +86,7 @@ const verifyEmail = catchAsync(async (req, res) => {
 
 module.exports = {
   createEmployer,
+  createEmployee,
   login,
   forgotPassword,
   resetPassword,

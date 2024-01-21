@@ -27,6 +27,8 @@ db.tokens = require('./token.model')(sequelizeInstance, Sequelize);
 
 db.users.hasOne(db.employers);
 db.employers.belongsTo(db.users);
+db.users.hasOne(db.employees);
+db.employees.belongsTo(db.users);
 
 // One-to-Many Relationship
 
