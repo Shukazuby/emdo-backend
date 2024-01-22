@@ -37,29 +37,24 @@ module.exports = (sequelize, dataType) => {
 
 // Company Rep Details
 
-firstName: {
+cRepFirstName: {
   type: dataType.STRING,
   trim: true,
 },
-lastName: {
+cRepLastName: {
   type: dataType.STRING,
   trim: true,
 },
-role: {
+cRepRole: {
   type: dataType.STRING,
   trim: true,
 },
-personalEmail: {
+cRepPersonalEmail: {
   type: dataType.STRING,
   trim: true,
 },
 
-
-
-
-
-
-  });
+});
 
   return employer;
 };
