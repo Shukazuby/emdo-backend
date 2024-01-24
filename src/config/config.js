@@ -61,4 +61,9 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
+  cloudinary: {
+    cloudName: envVars.CLOUD_NAME,
+    apiKey: envVars.API_KEY,
+    apiSecret: envVars.API_SECRET,
+  }
   };

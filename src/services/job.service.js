@@ -71,7 +71,7 @@ const getJobsByAnEmployer = async (employerId) => {
  *
  * @param {string} jobId  
  * @param {object} data  
- * @return {Promise<object>} Th
+ * @return {Promise<object>} 
  */
 const updateJobById = async (jobId, data) => {
   const job = await getJobsById(jobId);

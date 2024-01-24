@@ -12,8 +12,12 @@ const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
 const { db } = require('./models');
+const cloudinary = require('cloudinary').v2;
+const { cloudinaryConfig } = require('./config/cloudinary');
+const configPath = require("./config/config");
 
 const app = express();
+cloudinaryConfig()
 
 if (config.env !== 'test') {
   app.use(morgan.successHandler);
@@ -32,6 +36,11 @@ app.use(express.urlencoded({ extended: true }));
 // sanitize request data
 app.use(xss());
 
+// cloudinary.config({
+//   cloud_name: configPath.cloudinary.cloudName,
+//   api_key: configPath.cloudinary.apiKey,
+//   api_secret: configPath.cloudinary.apiSecret,
+// });
 
 // enable cors
 app.use(cors());
@@ -45,6 +54,8 @@ passport.use('jwt', jwtStrategy);
 if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
 }
+
+
 
 // v1 api routes
 app.use('/v1', routes);
