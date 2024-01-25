@@ -6,6 +6,9 @@ const auth = require('../../middlewares/auth');
 const router = express.Router()
 
 router.post('/post', auth('postJob'), jobController.createJob)
+router.get('/new',  jobController.getJobs)
+// router.get('/ongoing',  jobController.ongoingStatus)
+// router.get('/complete',  jobController.completeStatus)
 
 module.exports = router
 

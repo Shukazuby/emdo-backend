@@ -21,6 +21,10 @@ module.exports = (sequelize,dataType)=>{
           hourlyPay: {
             type: dataType.STRING,
           },
+          status: {
+            type: dataType.ENUM('new', 'ongoing', 'completed'),
+            defaultValue: 'ongoing'
+          }
     })
     
     return job

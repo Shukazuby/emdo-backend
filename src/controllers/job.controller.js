@@ -20,11 +20,32 @@ const getJob = catchAsync(async (req, res) => {
 });
 
 const getJobs = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['title', 'description', 'location', ]);
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const filter = pick(req.query, [ 'status', 'new']);
+  const options = pick(req.query, ['order', 'limit', 'page']);
   const result = await jobService.getJobs(filter, options);
   res.send(result);
 });
+
+// const newStatus = catchAsync(async (req, res) => {
+//   const filter = pick(req.query, ['date']);
+//   const options = pick(req.query, ['order', 'page']);
+//   const result = await jobService.getJobs(filter, options);
+//   res.send(result);
+// });
+
+// const ongoingStatus = catchAsync(async (req, res) => {
+//   const filter = pick(req.query, ['date']);
+//   const options = pick(req.query, ['order', 'limit', 'page']);
+//   const result = await jobService.ongoingStatus(filter, options);
+//   res.send(result);
+// });
+
+// const completeStatus = catchAsync(async (req, res) => {
+//   const filter = pick(req.query, ['date']);
+//   const options = pick(req.query, ['order', 'limit', 'page']);
+//   const result = await jobService.completeStatus(filter, options);
+//   res.send(result);
+// });
 
 const getJobsByAnEmployer = catchAsync(async (req, res) => {
   const { id } = req.user;
@@ -67,4 +88,7 @@ module.exports = {
   getJobsByAnEmployer,
   updateJob,
   deleteJob,
+  // ongoingStatus,
+  // completeStatus,
+  // newStatus,
 };
