@@ -35,7 +35,7 @@ module.exports = (sequelize, dataType) => {
       defaultValue: false,
     },
     userType: {
-      type: dataType.ENUM('employer', 'employee'),
+      type: dataType.ENUM('employer', 'employee','administrator', 'standard'),
       trim: true
     },
     addressLine1: {

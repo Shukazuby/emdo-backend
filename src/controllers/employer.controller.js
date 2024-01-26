@@ -11,6 +11,12 @@ const updateEmployer = catchAsync(async(req,res)=>{
     res.status(httpStatus.OK).send(employer)
 })
 
+const getEmployerByUserId = catchAsync(async(req,res)=>{
+  const employerById = await employerService.getAllEmployerData(req.params.id)
+  res.status(httpStatus.OK).send(employerById)
+})
+
 module.exports = {
-    updateEmployer
+    updateEmployer,
+    getEmployerByUserId
 }

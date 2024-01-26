@@ -69,51 +69,51 @@ const getJobs = async (filter, options) => {
   }
 };
 
-// const newStatus = async (filter, options) => {
-//   const defaultOptions = {
-//     order: [["createdAt", "DESC"]],
-//     limit: 20,
-//   };
+const newStatus = async (filter, options) => {
+  const defaultOptions = {
+    order: [["createdAt", "DESC"]],
+    limit: parseInt(options.limit),
+    offset: ((parseInt(options.page)-1) * parseInt(options.limit))
+  };
 
-//   const bothOptions = {
-//     ...defaultOptions,
-//     ...options,
-//   };
+  const bothOptions = {
+    ...defaultOptions,
+  };
 
-//   const jobs = await db.jobs.findAndCountAll({
-//     where: filter,
-//     ...bothOptions,
-//   });
+  const jobs = await db.jobs.findAll({
+    where: filter,
+    ...bothOptions,
+  });
+  return {counts: jobs.length, jobs};
+};
 
-//   return jobs;
-// };
 
-// const ongoingStatus = async (filter, options) => {
-//   const currentDate = new Date();
-//   filter.shiftEndDate = {
-//     [Op.or]: {
-//       [Op.gte]: currentDate,
-//       [Op.eq]: null,
-//     },
-//   };
-//   const jobs = await db.jobs.findAndCountAll({
-//     where: filter,
-//     ...options,
-//   });
-//   return jobs;
-// };
+const ongoingStatus = async (filter, options) => {
+  const currentDate = new Date();
+  filter.shiftEndDate = {
+    [Op.or]: {
+      [Op.gte]: currentDate,
+      [Op.eq]: null,
+    },
+  };
+  const jobs = await db.jobs.findAndCountAll({
+    where: filter,
+    ...options,
+  });
+  return jobs;
+};
 
-// const completeStatus = async (filter, options) => {
-//   const currentDate = new Date();
-//   filter.shiftEndDate = {
-//     [Op.lt]: currentDate,
-//   };
-//   const jobs = await db.jobs.findAndCountAll({
-//     where: filter,
-//     ...options,
-//   });
-//   return jobs;
-// };
+const completeStatus = async (filter, options) => {
+  const currentDate = new Date();
+  filter.shiftEndDate = {
+    [Op.lt]: currentDate,
+  };
+  const jobs = await db.jobs.findAndCountAll({
+    where: filter,
+    ...options,
+  });
+  return jobs;
+};
 
 /**
  * Retrieves a job from the database by its ID.
@@ -180,7 +180,7 @@ module.exports = {
   getJobs,
   updateJobById,
   deleteJobById,
-  // ongoingStatus,
-  // completeStatus,
-  // newStatus,
+  ongoingStatus,
+  completeStatus,
+  newStatus,
 };

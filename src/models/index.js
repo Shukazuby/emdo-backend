@@ -21,6 +21,7 @@ db.employees = require('./employee.model')(sequelizeInstance, Sequelize);
 db.employers = require('./employer.model')(sequelizeInstance, Sequelize);
 db.tokens = require('./token.model')(sequelizeInstance, Sequelize);
 db.jobs = require('./job.model')(sequelizeInstance, Sequelize);
+db.teamManagers = require('./teamManager.model')(sequelizeInstance, Sequelize);
 db.uploads = require('./upload.model')(sequelizeInstance, Sequelize);
 
 // Relationships For Models
@@ -35,6 +36,9 @@ db.employees.belongsTo(db.users);
 // One-to-Many Relationship
 db.employers.hasMany(db.jobs);
 db.jobs.belongsTo(db.employers);
+
+db.employers.hasMany(db.teamManagers);
+db.teamManagers.belongsTo(db.employers);
 
 db.users.hasMany(db.uploads)
 db.uploads.belongsTo(db.users)

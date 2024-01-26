@@ -6,6 +6,7 @@ const config = require('../../config/config');
 const employerRoute = require('./employer.route')
 const jobRoute = require('./job.route')
 const uploadRoute = require('./upload.route')
+const teamRoute = require('./teamManager.route')
 
 const defaultRoutes = [
   {
@@ -24,7 +25,12 @@ const defaultRoutes = [
 {
   path: '/uploads',
   route: uploadRoute
-}
+},
+{
+  path: '/team',
+  route: teamRoute
+},
+
 ]
 
 

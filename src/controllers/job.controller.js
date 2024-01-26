@@ -26,26 +26,26 @@ const getJobs = catchAsync(async (req, res) => {
   res.send(result);
 });
 
-// const newStatus = catchAsync(async (req, res) => {
-//   const filter = pick(req.query, ['date']);
-//   const options = pick(req.query, ['order', 'page']);
-//   const result = await jobService.getJobs(filter, options);
-//   res.send(result);
-// });
+const newStatus = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['date']);
+  const options = pick(req.query, ['limit', 'page']);
+  const result = await jobService.newStatus(filter, options);
+  res.send(result);
+});
 
-// const ongoingStatus = catchAsync(async (req, res) => {
-//   const filter = pick(req.query, ['date']);
-//   const options = pick(req.query, ['order', 'limit', 'page']);
-//   const result = await jobService.ongoingStatus(filter, options);
-//   res.send(result);
-// });
+const ongoingStatus = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['date']);
+  const options = pick(req.query, ['order', 'limit', 'page']);
+  const result = await jobService.ongoingStatus(filter, options);
+  res.send(result);
+});
 
-// const completeStatus = catchAsync(async (req, res) => {
-//   const filter = pick(req.query, ['date']);
-//   const options = pick(req.query, ['order', 'limit', 'page']);
-//   const result = await jobService.completeStatus(filter, options);
-//   res.send(result);
-// });
+const completeStatus = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['date']);
+  const options = pick(req.query, ['order', 'limit', 'page']);
+  const result = await jobService.completeStatus(filter, options);
+  res.send(result);
+});
 
 const getJobsByAnEmployer = catchAsync(async (req, res) => {
   const { id } = req.user;
@@ -57,20 +57,21 @@ const getJobsByAnEmployer = catchAsync(async (req, res) => {
 const updateJob = catchAsync(async (req, res) => {
   const { id } = req.user;
   const { jobId } = req.params;
-  const employer = employerService.getEmployerByUserId(id);
+  const employer = await employerService.getEmployerByUserId(id);
   const job = await jobService.getJobsById(jobId);
   if (employer.id !== job.employerId) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Unauthorized');
   }
   const updatedJob = await jobService.updateJobById(jobId, req.body);
   res.send(updatedJob);
-});
+}
+);
 
 const deleteJob = catchAsync(async (req, res) => {
   const { id } = req.user;
   const { jobId } = req.params;
 
-  const employer = employerService.getEmployerByUserId(id);
+  const employer = await employerService.getEmployerByUserId(id);
   const job = await jobService.getJobsById(jobId);
 
   if (employer.id !== job.employerId) {
@@ -88,7 +89,7 @@ module.exports = {
   getJobsByAnEmployer,
   updateJob,
   deleteJob,
-  // ongoingStatus,
-  // completeStatus,
-  // newStatus,
+  ongoingStatus,
+  completeStatus,
+  newStatus,
 };

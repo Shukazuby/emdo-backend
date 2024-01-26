@@ -54,11 +54,32 @@ const updateEmployer = async (updateBody, id) => {
 
 const getEmployerByUserId = async (id) => {
   const employer = db.employers.findOne({ where: { id } });
+  if(!employer){
+    throw new ApiError(httpStatus.NOT_FOUND, 'employer not found')
+  }
   return employer;
+};
+
+const getAllEmployerData = async (id) => {
+  const employers = db.users.findByPk(id, {
+    include: [
+      {
+        model: db.employers,
+        as: 'employer',
+      },
+    ],
+  });
+
+  if(!employers){
+    throw new ApiError(httpStatus.NOT_FOUND, 'employer not found')
+  }
+
+  return employers;
 };
 
 module.exports = {
   createEmployer,
   updateEmployer,
-  getEmployerByUserId
+  getEmployerByUserId,
+  getAllEmployerData
 };
