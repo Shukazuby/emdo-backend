@@ -10,29 +10,23 @@ const {
 } = require("../services");
 
 
-const createTeamManager = catchAsync(async (req, res) => {
-  const user = await userService.createUser("administrator", req.body);
-  const team = await teamManagerService.createTeam(user.id, req.body);
-  // const verifyEmailToken = await tokenService.generateVerifyEmailToken(
-  //   user.dataValues
-  // );
-  await emailService.sendVerificationEmail(user.email);
+const addNewUser = catchAsync(async (req, res) => {
+  const employer = await teamManagerService.addNewUser(req.user.id, req.body);
 
   res.status(httpStatus.CREATED).send({
     message: "Team added successfully",
-    user: user,
-    team,
+    employer,
   });
 });
 
 
-const updateTeamManager = catchAsync(async(req,res)=>{
-    const teamManager = await teamManagerService.updateTeam(req.body, req.params.id)
+const updateNewUser = catchAsync(async(req,res)=>{
+    const teamManager = await teamManagerService.updateUser(req.body, req.params.id)
     res.status(httpStatus.OK).send(teamManager)
 })
 
 
 module.exports = {
-  updateTeamManager,
-  createTeamManager
+  updateNewUser,
+  addNewUser
 }

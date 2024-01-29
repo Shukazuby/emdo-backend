@@ -53,12 +53,6 @@ cRepPersonalEmail: {
   type: dataType.STRING,
   trim: true,
 },
-accessLevel: {
-  type: dataType.ENUM('administrator', 'standard'),
-  trim: true,
-},
-
-
 });
 
   return employer;

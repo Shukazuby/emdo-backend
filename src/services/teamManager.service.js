@@ -1,14 +1,15 @@
 const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const { db } = require("../models");
-const { userService } = require("../services");
+const { userService, tokenService, emailService } = require("../services");
+const bcrypt = require("bcryptjs");
 
 /**
  * creates a subject
- * @param {Object} teamManagerBody
+ * @param {Object} addUserBody
  * @returns {Promise<Object>}
  */
-const createTeam = async (id, teamManagerBody) => {
+const addNewUser = async (id, addUserBody) => {
   const user = await db.users.findOne({
     where: {
       id,
@@ -17,35 +18,41 @@ const createTeam = async (id, teamManagerBody) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
-
   const employer = await db.employers.findOne({
     where: {
-      id,
+      userId: user.id,
     },
   });
   if (!employer) {
-    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "employer not found");
   }
 
-  const teamManager = db.teamManagers.create({
-    ...teamManagerBody,
-    userId: user.id,
-    employerId: employer.id
+  const userTeam = await userService.createUser("employer", addUserBody);
+  await emailService.addedUser(userTeam.email, userTeam.id);
+
+  const newEmployer = await db.employers.create({
+    ...addUserBody,
+    userId: userTeam.id,
   });
-  if (!teamManager) {
-    throw new ApiError(httpStatus.NOT_FOUND, "teamManager not found");
-  }
-  return teamManager;
+
+  const addUser = await db.teamManagers.create({
+    ...addUserBody,
+    userId: userTeam.id,
+    employerId: employer.id,
+  });
+  return { addUser, newEmployer };
 };
 
-const updateTeam = async (updateBody, id) => {
+const updateUser = async (updateBody, id) => {
   const user = await db.users.findOne({
     where: {
       id,
     },
   });
 
-const updateTeam =  await db.teamManagers.update(updateBody, {
+  updateBody.password = bcrypt.hashSync(updateBody.password, 8);
+
+  await db.users.update(updateBody, {
     where: {
       id,
     },
@@ -53,11 +60,26 @@ const updateTeam =  await db.teamManagers.update(updateBody, {
   if (updateBody.email && (await userService.isEmailTaken(updateBody.email))) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
+  await db.employers.update(updateBody, {
+    where: {
+      id,
+    },
+  });
 
-  return updateTeam;
+  const employer = await db.employers.findOne({
+    where: {
+      userId: user.id,
+    },
+  });
+  const updateNewUser = await db.teamManagers.update(updateBody, {
+    where: {
+      userId: employer.id,
+    },
+  });
+  return updateNewUser;
 };
 
 module.exports = {
-  createTeam,
-  updateTeam,
+  addNewUser,
+  updateUser,
 };

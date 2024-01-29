@@ -39,6 +39,9 @@ db.jobs.belongsTo(db.employers);
 
 db.employers.hasMany(db.teamManagers);
 db.teamManagers.belongsTo(db.employers);
+db.users.hasMany(db.teamManagers);
+db.teamManagers.belongsTo(db.users);
+
 
 db.users.hasMany(db.uploads)
 db.uploads.belongsTo(db.users)

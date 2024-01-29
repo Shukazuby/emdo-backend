@@ -1,7 +1,8 @@
 const allRoles = {
     admin: ['getUsers', 'manageUsers', 'verifyUsers'],
-    employer: ['postJob'],
+    employer: ['postJobs', 'manageJobs', ''],
     employee: [],
+    teamManager: ['administrator', 'standard']
   };
   
   const roles = Object.keys(allRoles);

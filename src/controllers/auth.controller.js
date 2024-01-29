@@ -10,6 +10,7 @@ const {
   employerService,
   employeeService,
 } = require("../services");
+const { db } = require("../models");
 
 const createEmployer = catchAsync(async (req, res) => {
   const user = await userService.createUser("employer", req.body);
@@ -59,6 +60,71 @@ const login = catchAsync(async (req, res) => {
   });
 });
 
+const loginAdmin = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new ApiError("Incorrect Email or Password", httpStatus.UNAUTHORIZED);
+  }
+
+  const user = await authService.loginUserWithEmailAndPassword(email, password);
+
+  const teamManager = await db.teamManagers.findOne({
+    where: {
+      userId: user.id
+    }
+  });
+
+  if (!teamManager) {
+    throw new ApiError("User not found", httpStatus.NOT_FOUND);
+  }
+
+  if (teamManager.accessLevel !== 'administrator') {
+    throw new ApiError("You are not authorized to log in", httpStatus.UNAUTHORIZED);
+  }
+
+  const tokens = await tokenService.generateAuthTokens(user.id);
+
+  res.status(httpStatus.OK).send({
+    message: "Login successful",
+    tokens,
+    user,
+  });
+});
+
+const loginStandard = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    throw new ApiError("Incorrect Email or Password", httpStatus.UNAUTHORIZED);
+  }
+
+  const user = await authService.loginUserWithEmailAndPassword(email, password);
+
+  const teamManager = await db.teamManagers.findOne({
+    where: {
+      userId: user.id
+    }
+  });
+
+  if (!teamManager) {
+    throw new ApiError("User not found", httpStatus.NOT_FOUND);
+  }
+
+  if (teamManager.accessLevel !== 'standard') {
+    throw new ApiError("You are not authorized to log in", httpStatus.UNAUTHORIZED);
+  }
+
+  const tokens = await tokenService.generateAuthTokens(user.id);
+
+  res.status(httpStatus.OK).send({
+    message: "Login successful",
+    tokens,
+    user,
+  });
+});
+
+
 const forgotPassword = catchAsync(async (req, res) => {
   const resetPasswordToken = await tokenService.generateResetPasswordToken(
     req.body.email
@@ -91,4 +157,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  loginAdmin,
+  loginStandard
 };
