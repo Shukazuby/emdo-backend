@@ -1,11 +1,12 @@
 const express = require('express');
 const authController = require('../../controllers/auth.controller');
+const { multerUploads } = require('../../config/multer');
 
 
 const router = express.Router();
 
-router.post('/employers/register', authController.createEmployer);
-router.post('/employees/register', authController.createEmployee);
+router.post('/employers/register', multerUploads, authController.createEmployer);
+router.post('/employees/register', multerUploads, authController.createEmployee);
 router.post('/login', authController.login);
 router.post('/reset',authController.resetPassword);
 router.post('/forget',authController.forgotPassword);

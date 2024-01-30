@@ -1,10 +1,16 @@
 const validator = require('validator');
-
 module.exports = (sequelize, dataType) => {
-  const user = sequelize.define('users', {
-    fullName: {
+  const referee = sequelize.define('referee', {
+    title: {
+      type: dataType.ENUM('miss', 'mr', 'dr', 'mrs'),
+      trim: true,
+    },
+    firstName: {
       type: dataType.STRING,
-      allowNull: false,
+      trim: true,
+    },
+    lastName: {
+      type: dataType.STRING,
       trim: true,
     },
     email: {
@@ -19,30 +25,19 @@ module.exports = (sequelize, dataType) => {
         }
       },
     },
-    password: {
-      type: dataType.STRING,
-      allowNull: false,
-      trim: true,
-      minlength: 8,
-      validate(value) {
-        if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-          throw new Error('Password must contain at least one letter and one number');
-        }
-      },
-    },
-    isEmailVerified: {
-      type: dataType.BOOLEAN,
-      defaultValue: false,
-    },
-    userType: {
-      type: dataType.ENUM('employer', 'employee'),
-      trim: true
-    },
-    addressLine1: {
+    phoneNumber: {
       type: dataType.STRING,
       trim: true,
     },
-    addressLine2: {
+    position: {
+      type: dataType.STRING,
+      trim: true,
+    },
+    organization: {
+      type: dataType.STRING,
+      trim: true,
+    },
+    orgAddress: {
       type: dataType.STRING,
       trim: true,
     },
@@ -50,27 +45,20 @@ module.exports = (sequelize, dataType) => {
       type: dataType.STRING,
       trim: true,
     },
+    postCode: {
+      type: dataType.STRING,
+      trim: true,
+    },
     country: {
       type: dataType.STRING,
       trim: true,
     },
-    postcode: {
-      type: dataType.STRING,
-      trim: true,
-    },
-    industry: {
-      type: dataType.STRING,
-      trim: true,
-    },
-    phoneNumber: {
-      type: dataType.STRING,
-      trim: true,
-    },
-    picture:{
+    refereeFile:{
       type: dataType.STRING,
       trim: true,
     }
+
   });
 
-  return user;
+  return referee;
 };

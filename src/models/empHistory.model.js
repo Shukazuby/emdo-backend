@@ -1,28 +1,35 @@
 module.exports = (sequelize, dataType) => {
-  const employee = sequelize.define('employee', {
-    categoryOfJobSought: {
+  const empHistory = sequelize.define('empHistory', {
+    jobTitle: {
       type: dataType.STRING,
       trim: true,
     },
-    cv: {
+    companyName: {
       type: dataType.STRING,
       trim: true,
     },
-    rightToWork: {
+    city: {
       type: dataType.STRING,
       trim: true,
     },
-    shareCode: {
+    country: {
       type: dataType.STRING,
       trim: true,
     },
-    dbsNumber: {
+    from: {
+      type: dataType.DATE,
+      trim: true,
+    },
+    to: {
+      type: dataType.DATE,
+      trim: true,
+    },
+    jobDescription: {
       type: dataType.STRING,
       trim: true,
     },
-
 
   });
 
-  return employee;
+  return empHistory;
 };

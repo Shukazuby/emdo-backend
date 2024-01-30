@@ -14,7 +14,7 @@ const { db } = require("../models");
 
 const createEmployer = catchAsync(async (req, res) => {
   const user = await userService.createUser("employer", req.body);
-  const employer = await employerService.createEmployer(user.id, req.body);
+  const employer = await employerService.createEmployer(user.id, req.body, req.file);
   const verifyEmailToken = await tokenService.generateVerifyEmailToken(
     user.dataValues
   );
@@ -29,7 +29,7 @@ const createEmployer = catchAsync(async (req, res) => {
 
 const createEmployee = catchAsync(async (req, res) => {
   const user = await userService.createUser("employee", req.body);
-  const employee = await employeeService.createEmployee(user.id,req.body);
+  const employee = await employeeService.createEmployee(user.id, req.body, req.file);
   const verifyEmailToken = await tokenService.generateVerifyEmailToken(
     user.dataValues
   );

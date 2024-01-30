@@ -4,6 +4,7 @@ const router = express.Router();
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 const employerRoute = require('./employer.route')
+const employeeRoute = require('./employee.route')
 const jobRoute = require('./job.route')
 const uploadRoute = require('./upload.route')
 const teamRoute = require('./teamManager.route')
@@ -29,6 +30,10 @@ const defaultRoutes = [
 {
   path: '/team',
   route: teamRoute
+},
+{
+  path: '/employees',
+  route: employeeRoute
 },
 
 ]
