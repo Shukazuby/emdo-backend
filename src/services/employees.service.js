@@ -209,6 +209,116 @@ const deleteCertById = async (certId) => {
   return cert;
 };
 
+/** 
+Employee Cv
+*/
+
+const addCv = async (id, data, file) => {
+  const user = await db.users.findOne({
+    where:{
+      id
+    }
+  });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const employee = await db.employees.findOne({ 
+    where: { 
+      userId: user.dataValues.id 
+    } 
+  });
+
+  const fileUri = dataUri(file);
+    
+  const uploadCv = await uploader.upload(fileUri.content);
+  
+  const createCv = await db.cv.create({
+    ...data,
+    cv: uploadCv.secure_url, 
+    employeeId: employee.dataValues.id,
+  });
+
+  return createCv;
+};
+
+const getCvById = async (id) => {
+  const cv = await db.cv.findByPk(id);
+  return cv;
+};
+
+const getCvByAnEmployee = async (employeeId) => {
+  const cv = await db.cv.findAll({ where: { employeeId } });
+  return cv;
+};
+
+const deleteCvById = async (cvId) => {
+  const cv = await db.cv.findOne({ where: {cvId}});
+  if (!cv) {
+    throw new ApiError(httpStatus.NOT_FOUND, "cv not found");
+  }
+  await db.cv.destroy({
+    where: {
+      id: cvId,
+    },
+  });
+  return cv;
+};
+
+/** 
+* Employee Right to work
+*/
+
+const addRtw = async (id, data, file) => {
+  const user = await db.users.findOne({
+    where:{
+      id
+    }
+  });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+  const employee = await db.employees.findOne({ 
+    where: { 
+      userId: user.dataValues.id 
+    } 
+  });
+
+  const fileUri = dataUri(file);
+    
+  const uploadRtw = await uploader.upload(fileUri.content);
+  
+  const createRtw = await db.rightToWork.create({
+    ...data,
+    rightToWork: uploadRtw.secure_url, 
+    employeeId: employee.dataValues.id,
+  });
+
+  return createRtw;
+};
+
+const getRtwById = async (id) => {
+  const rtw = await db.rightToWork.findByPk(id);
+  return rtw;
+};
+
+const getRtwByAnEmployee = async (employeeId) => {
+  const rtw = await db.rightToWork.findAll({ where: { employeeId } });
+  return rtw;
+};
+
+const deleteRtwById = async (rtwId) => {
+  const rtw = await db.rightToWork.findOne({ where: {rtwId}});
+  if (!rtw) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Right to work not found");
+  }
+  await db.rtw.destroy({
+    where: {
+      id: rtwId,
+    },
+  });
+  return rtw;
+};
+
 
 /** 
 Employee Referee Service
@@ -289,5 +399,14 @@ module.exports = {
   getRefereeByAnEmployee,
   getRefereeById,
   updateRefereeById,
-  deleteRefereeById
+  deleteRefereeById,
+  addCv,
+  getCvById,
+  getCvByAnEmployee,
+  deleteCvById,
+  addRtw,
+  getRtwByAnEmployee,
+  getRtwById,
+  deleteRtwById,
+
 };

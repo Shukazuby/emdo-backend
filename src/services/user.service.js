@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const ApiError = require('../utils/ApiError');
 const { db } = require('../models');
 const logger = require('../config/logger');
+const { dataUri } = require('../config/multer');
+const { uploader } = require('../config/cloudinary');
 
 /**
  * Check if email is taken
@@ -31,21 +33,21 @@ const isPasswordMatch = async function (password, user) {
  * @param {Object} userBody
  * @returns {Promise<User>}
  */
-const createUser = async (userType, userBody, file) => {
+const createUser = async (userType, userBody,) => {
   if (await isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
 
-  const fileUri = dataUri(file);
+  // const fileUri = dataUri(file);
     
-  const uploadPicture = await uploader.upload(fileUri.content);
+  // const uploadPicture = await uploader.upload(fileUri.content);
   
 
   // eslint-disable-next-line no-param-reassign
   userBody.password = bcrypt.hashSync(userBody.password, 8);
   return db.users.create({
     ...userBody,
-    picture: uploadPicture.secure_url,
+    // picture: uploadPicture.secure_url,
     userType,
   });
 };

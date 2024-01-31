@@ -2,13 +2,15 @@ const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const { db } = require("../models");
 const { userService } = require("../services");
+const { uploader } = require("../config/cloudinary");
+const { dataUri } = require("../config/multer");
 
 /**
  * creates a subject
  * @param {Object} employerBody
  * @returns {Promise<Object>}
  */
-const createEmployer = async (id, employerBody) => {
+const createEmployer = async (id, employerBody,file) => {
   const user = await db.users.findOne({
     where: {
       id,
@@ -18,8 +20,14 @@ const createEmployer = async (id, employerBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
 
+  const fileUri = dataUri(file);
+    
+  const logoFile = await uploader.upload(fileUri.content);
+  
+  
   const employer = db.employers.create({
     ...employerBody,
+    logo: logoFile.secure_url,
     userId: user.id,
   });
   if (!employer) {

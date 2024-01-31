@@ -87,7 +87,7 @@ const getCert = catchAsync(async (req, res) => {
   const { certId } = req.params;
   const cert = await employeeService.getCertsById(certId);
   if (!cert) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Employment history not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Certification not found");
   }
   res.status(httpStatus.OK).send(cert);
 });
@@ -123,6 +123,91 @@ const deleteCert = catchAsync(async (req, res) => {
   }
 
   await employeeService.deleteCertById(certId);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+/**
+ * Employee Cv Controller
+ */
+
+const addCv = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const cv = await employeeService.addCv(id, req.body, req.file);
+  res.status(httpStatus.CREATED).send(cv);
+});
+
+const getCv = catchAsync(async (req, res) => {
+  const { cvId } = req.params;
+  const cv = await employeeService.getCvById(cvId);
+  if (!cv) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Cv not found");
+  }
+  res.status(httpStatus.OK).send(cv);
+});
+
+const getCvByAnEmployee = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const employee = await employeeService.getEmployeeByUserId(id);
+  const cv = await employeeService.getCvByAnEmployee(employee.id);
+  res.send(cv);
+});
+
+const deleteCv = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const { cvId } = req.params;
+
+  const employee = await employeeService.getEmployeeByUserId(id);
+  const cv = await employeeService.getCvById(cvId);
+
+  if (employee.id !== cv.employeeId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  await employeeService.deleteCvById(cvId);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+/**
+ * Employee Right to Work Controller
+ */
+
+
+const addRtw = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const rtw = await employeeService.addRtw(id, req.body, req.file);
+  res.status(httpStatus.CREATED).send(rtw);
+});
+
+const getRtw = catchAsync(async (req, res) => {
+  const { rtwId } = req.params;
+  const rtw = await employeeService.getRtwById(rtwId);
+  if (!rtw) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "Right to work document not found"
+    );
+  }
+  res.status(httpStatus.OK).send(rtw);
+});
+
+const getRtwByAnEmployee = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const employee = await employeeService.getEmployeeByUserId(id);
+  const rtw = await employeeService.getRtwByAnEmployee(employee.id);
+  res.send(rtw);
+});
+
+const deleteRtw = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const { rtwId } = req.params;
+
+  const employee = await employeeService.getEmployeeByUserId(id);
+  const rtw = await employeeService.getRtwById(rtwId);
+
+  if (employee.id !== rtw.employeeId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+  }
+
+  await employeeService.deleteRtwById(rtwId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -201,4 +286,12 @@ module.exports = {
   updateReferee,
   deleteReferee,
   getReferee,
+  addCv,
+  getCv,
+  getCvByAnEmployee,
+  deleteCv,
+  addRtw,
+  getRtw,
+  getRtwByAnEmployee,
+  deleteRtw,
 };

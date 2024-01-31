@@ -26,6 +26,8 @@ db.uploads = require("./upload.model")(sequelizeInstance, Sequelize);
 db.empCerts = require("./empCert.model")(sequelizeInstance, Sequelize);
 db.empHistory = require("./empHistory.model")(sequelizeInstance, Sequelize);
 db.referees = require("./empReferee.model")(sequelizeInstance, Sequelize);
+db.rightToWork = require("./rightToWork.model")(sequelizeInstance, Sequelize);
+db.cv = require("./cv.model")(sequelizeInstance, Sequelize);
 
 // Relationships For Models
 
@@ -58,6 +60,12 @@ db.empHistory.belongsTo(db.employees);
 
 db.employees.hasMany(db.referees);
 db.referees.belongsTo(db.employees);
+
+db.employees.hasMany(db.cv);
+db.cv.belongsTo(db.employees);
+
+db.employees.hasMany(db.rightToWork);
+db.rightToWork.belongsTo(db.employees);
 
 // Many-to-many Relationship
 

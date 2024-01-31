@@ -1,10 +1,11 @@
 module.exports = (sequelize, dataType) => {
-  const employee = sequelize.define('employee', {
-    categoryOfJobSought: {
+  const cv = sequelize.define('cv', {
+    cv: {
       type: dataType.STRING,
       trim: true,
     },
+
   });
 
-  return employee;
+  return cv;
 };
