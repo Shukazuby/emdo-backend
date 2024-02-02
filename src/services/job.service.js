@@ -175,25 +175,33 @@ const deleteJobById = async (jobId) => {
 };
 
 const allFilter = async (filter, options) => {
+  const defaultOptions = {
+    limit: parseInt(options.limit),
+    offset: (parseInt(options.page) - 1) * parseInt(options.limit),
+  };
+
   if (filter.minPrice !== undefined && filter.maxPrice !== undefined) {
     filter.hourlyPay = {
       [Op.between]: [filter.minPrice, filter.maxPrice],
     };
-    // Remove minPrice and maxPrice from the filter
     delete filter.minPrice;
     delete filter.maxPrice;
   }
+
   if (filter.role) {
+    const roles = filter.role.split(' ')
     filter.title = {
-      [Op.like]: `%${filter.role}%`,
+        [Op.or]: roles.map(role => ({ [Op.like]: `%${role}%` })),
     };
     delete filter.role;
-  }
+}
+
+
   if (filter.company) {
     const employers = await db.employers.findAll({
       where: {
         companyName: {
-          [Op.like]: `%${filter.company}%`
+          [Op.like]: `%${filter.company}%`,
         },
       },
     });
@@ -203,21 +211,136 @@ const allFilter = async (filter, options) => {
     };
     delete filter.company;
   }
-  const jobs = await db.jobs.findAndCountAll({
+
+  if (filter.date) {
+    const currentDate = new Date();
+    let startDate;
+
+    switch (filter.date) {
+      case "thisWeek":
+        startDate = new Date(currentDate);
+        startDate.setDate(startDate.getDate() - startDate.getDay());
+        break;
+      case "nextWeek":
+        startDate = new Date(currentDate);
+        startDate.setDate(startDate.getDate() + (7 - startDate.getDay()));
+        break;
+      case "nextMonth":
+        startDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          1
+        );
+        break;
+      case "nextThreeMonths":
+        startDate = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 3,
+          1
+        );
+        break;
+      default:
+        throw new Error("Invalid date type");
+    }
+
+    const endDate = new Date(startDate);
+    switch (filter.date) {
+      case "thisWeek":
+        endDate.setDate(endDate.getDate() + 6);
+        break;
+      case "nextWeek":
+        endDate.setDate(endDate.getDate() + 6);
+        break;
+      case "nextMonth":
+        endDate.setMonth(endDate.getMonth() + 1);
+        endDate.setDate(0);
+        break;
+      case "nextThreeMonths":
+        endDate.setMonth(endDate.getMonth() + 3);
+        endDate.setDate(0);
+        break;
+      default:
+        throw new Error("Invalid date type");
+    }
+
+    filter.shiftStartDate = {
+      [Op.between]: [startDate, endDate],
+    };
+
+    delete filter.date;
+  }
+
+  if (filter.time) {
+    const currentTime = new Date();
+    const timeOptions = {
+      morning: [0, 11],
+      afternoon: [12, 17],
+      evening: [18, 23],
+    };
+
+    let startTime, endTime;
+
+    switch (filter.time) {
+      case "morning":
+        startTime = new Date(currentTime);
+        startTime.setHours(
+          timeOptions.morning[0],
+          timeOptions.morning[1],
+          0,
+          0
+        );
+        endTime = new Date(currentTime);
+        endTime.setHours(
+          timeOptions.afternoon[0],
+          timeOptions.afternoon[1],
+          0,
+          0
+        );
+        break;
+      case "afternoon":
+        startTime = new Date(currentTime);
+        startTime.setHours(
+          timeOptions.afternoon[0],
+          timeOptions.afternoon[1],
+          0,
+          0
+        );
+        endTime = new Date(currentTime);
+        endTime.setHours(timeOptions.evening[0], timeOptions.evening[1], 0, 0);
+        break;
+      case "evening":
+        startTime = new Date(currentTime);
+        startTime.setHours(
+          timeOptions.evening[0],
+          timeOptions.evening[1],
+          0,
+          0
+        );
+        endTime = new Date(currentTime);
+        endTime.setDate(endTime.getDate() + 1); // Next day
+        endTime.setHours(timeOptions.morning[0], timeOptions.morning[1], 0, 0);
+        break;
+      default:
+        throw new ApiErrorError(httpStatus.NOT_FOUND, "Invalid time type");
+    }
+
+    filter.shiftStartDate = {
+      [Op.between]: [startTime, endTime],
+    };
+
+    delete filter.time;
+  }
+
+  const bothOptions = {
+    ...defaultOptions,
+  };
+
+  const jobs = await db.jobs.findAll({
     where: filter,
-    ...options,
+    ...bothOptions,
   });
 
-  // if (filter.shiftStartDate) {
-  //   const startDate = new Date();
-  //   startDate.setDate(startDate.getDate() - filter.shiftStartDate);
-
-  //   filter.shiftStartDate = {
-  //     [Op.gte]: startDate,
-  //   };
-  // }
-
-  return jobs;
+  return { counts: jobs.length, jobs };
 };
 
 module.exports = {

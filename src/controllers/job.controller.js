@@ -83,7 +83,7 @@ const deleteJob = catchAsync(async (req, res) => {
 });
 
 const allFilter = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['location','role', 'company', 'time', 'date', 'distance', 'minPrice', 'maxPrice' ]);
+  const filter = pick(req.query, ['location','role', 'company', 'time', 'distance', 'minPrice', 'maxPrice', 'date',]);
   const options = pick(req.query, ['order', 'limit', 'page']);
   const result = await jobService.allFilter(filter, options);
   res.send(result);
