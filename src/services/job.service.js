@@ -19,7 +19,11 @@ const createJob = async (id, data) => {
   if (user.userType !== "employer") {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
   }
-  const employer = await getEmployerByUserId(id);
+  const employer = await db.employers.findOne({
+    where: {
+      userId: user.id,
+    },
+  });
 
   const job = await db.jobs.create({
     ...data,
@@ -48,14 +52,12 @@ const getJobs = async (filter, options) => {
 
   try {
     if (filter.status === "new") {
-
       combinedOptions.limit = 20;
       const jobs = await db.jobs.findAll({
         ...combinedOptions,
       });
-  
+
       return { count: jobs.length, jobs };
-  
     }
     const jobs = await db.jobs.findAll({
       where: filter,
@@ -65,7 +67,7 @@ const getJobs = async (filter, options) => {
     return { count: jobs.length, jobs };
   } catch (error) {
     console.error(error);
-    throw new Error('Error fetching jobs');
+    throw new Error("Error fetching jobs");
   }
 };
 
@@ -73,7 +75,7 @@ const newStatus = async (filter, options) => {
   const defaultOptions = {
     order: [["createdAt", "DESC"]],
     limit: parseInt(options.limit),
-    offset: ((parseInt(options.page)-1) * parseInt(options.limit))
+    offset: (parseInt(options.page) - 1) * parseInt(options.limit),
   };
 
   const bothOptions = {
@@ -84,9 +86,8 @@ const newStatus = async (filter, options) => {
     where: filter,
     ...bothOptions,
   });
-  return {counts: jobs.length, jobs};
+  return { counts: jobs.length, jobs };
 };
-
 
 const ongoingStatus = async (filter, options) => {
   const currentDate = new Date();
@@ -173,6 +174,52 @@ const deleteJobById = async (jobId) => {
   return job;
 };
 
+const allFilter = async (filter, options) => {
+  if (filter.minPrice !== undefined && filter.maxPrice !== undefined) {
+    filter.hourlyPay = {
+      [Op.between]: [filter.minPrice, filter.maxPrice],
+    };
+    // Remove minPrice and maxPrice from the filter
+    delete filter.minPrice;
+    delete filter.maxPrice;
+  }
+  if (filter.role) {
+    filter.title = {
+      [Op.like]: `%${filter.role}%`,
+    };
+    delete filter.role;
+  }
+  if (filter.company) {
+    const employers = await db.employers.findAll({
+      where: {
+        companyName: {
+          [Op.like]: `%${filter.company}%`
+        },
+      },
+    });
+    const employerIds = employers.map((employer) => employer.id);
+    filter.employerId = {
+      [Op.in]: employerIds,
+    };
+    delete filter.company;
+  }
+  const jobs = await db.jobs.findAndCountAll({
+    where: filter,
+    ...options,
+  });
+
+  // if (filter.shiftStartDate) {
+  //   const startDate = new Date();
+  //   startDate.setDate(startDate.getDate() - filter.shiftStartDate);
+
+  //   filter.shiftStartDate = {
+  //     [Op.gte]: startDate,
+  //   };
+  // }
+
+  return jobs;
+};
+
 module.exports = {
   createJob,
   getJobsById,
@@ -183,4 +230,5 @@ module.exports = {
   ongoingStatus,
   completeStatus,
   newStatus,
+  allFilter,
 };

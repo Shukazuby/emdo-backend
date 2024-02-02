@@ -1,6 +1,6 @@
 const allRoles = {
     admin: ['getUsers', 'manageUsers', 'verifyUsers'],
-    employer: ['postJobs', 'manageJobs', ''],
+    employer: ['postJobs', 'manageJobs'],
     employee: [],
     teamManager: ['administrator', 'standard']
   };

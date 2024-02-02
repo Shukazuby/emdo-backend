@@ -4,6 +4,16 @@ module.exports = (sequelize, dataType) => {
       type: dataType.STRING,
       trim: true,
     },
+    bank: {
+      type: dataType.STRING,
+      trim: true,
+    },
+    accountNumber: {
+      type: dataType.INTEGER,
+      trim: true,
+    },
+
+
   });
 
   return employee;

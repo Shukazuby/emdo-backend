@@ -25,7 +25,7 @@ const createEmployer = async (id, employerBody,file) => {
   const logoFile = await uploader.upload(fileUri.content);
   
   
-  const employer = db.employers.create({
+  const employer = await db.employers.create({
     ...employerBody,
     logo: logoFile.secure_url,
     userId: user.id,
@@ -52,7 +52,7 @@ const updateEmployer = async (updateBody, id) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
 
-  const updateEmployer = db.employers.update(updateBody, {
+  const updateEmployer = await db.employers.update(updateBody, {
     where: {
       userId: user.id,
     },
@@ -61,7 +61,7 @@ const updateEmployer = async (updateBody, id) => {
 };
 
 const getEmployerByUserId = async (id) => {
-  const employer = db.employers.findOne({ where: { id } });
+  const employer = await db.employers.findOne({ where: { id } });
   if(!employer){
     throw new ApiError(httpStatus.NOT_FOUND, 'employer not found')
   }
@@ -69,7 +69,7 @@ const getEmployerByUserId = async (id) => {
 };
 
 const getAllEmployerData = async (id) => {
-  const employers = db.users.findByPk(id, {
+  const employers = await db.users.findByPk(id, {
     include: [
       {
         model: db.employers,

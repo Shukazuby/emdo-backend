@@ -82,6 +82,14 @@ const deleteJob = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const allFilter = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['location','role', 'company', 'time', 'date', 'distance', 'minPrice', 'maxPrice' ]);
+  const options = pick(req.query, ['order', 'limit', 'page']);
+  const result = await jobService.allFilter(filter, options);
+  res.send(result);
+});
+
+
 module.exports = {
   createJob,
   getJob,
@@ -92,4 +100,5 @@ module.exports = {
   ongoingStatus,
   completeStatus,
   newStatus,
+  allFilter
 };

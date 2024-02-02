@@ -5,13 +5,14 @@ const auth = require('../../middlewares/auth');
 
 const router = express.Router()
 
-router.post('/post', auth('postJob'), jobController.createJob)
+router.post('/post', auth('postJobs'), jobController.createJob)
 router.get('/new', jobController.newStatus)
 router.get('/status',  jobController.getJobs)
 router.get('/ongoing',  jobController.ongoingStatus)
 router.get('/complete',  jobController.completeStatus)
 router.get('/employer', auth(), jobController.getJobsByAnEmployer);
 router.get('/:jobId', auth(),jobController.getJob);
+router.get('/filters/all', jobController.allFilter)
 router.patch('/:jobId', auth(),  jobController.updateJob)
 router.delete('/:jobId', auth(), jobController.deleteJob);
 
