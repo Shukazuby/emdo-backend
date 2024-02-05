@@ -144,6 +144,8 @@ module.exports = router;
  *     summary: Create employee employment history
  *     description: 
  *     tags: [ employee, history]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -329,6 +331,8 @@ module.exports = router;
  *     summary: Create a training and certification
  *     description: 
  *     tags: [ employee, cert]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -510,6 +514,8 @@ module.exports = router;
  *     summary: Create a referee
  *     description: 
  *     tags: [ employee, referee]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

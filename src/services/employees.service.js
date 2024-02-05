@@ -66,7 +66,7 @@ const updateEmployee = async (updateBody, id) => {
 const getEmployeeByUserId = async (id) => {
   const employee = db.employees.findOne({ where: { id } });
   if(!employee){
-    throw new ApiError(httpStatus.NOT_FOUND, 'employer not found')
+    throw new ApiError(httpStatus.NOT_FOUND, 'employee not found')
   }
   return employee;
 };

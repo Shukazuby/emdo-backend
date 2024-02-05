@@ -349,6 +349,41 @@ module.exports = router
  *           minimum: 1
  *           default: 1
  *         description: Page number
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *         description: 
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: integer
+ *         description: 
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: integer
+ *         description: 
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: date
+ *         description: 
+ *       - in: query
+ *         name: time
+ *         schema:
+ *           type: date
+ *         description: 
+ *       - in: query
+ *         name: company
+ *         schema:
+ *           type: string
+ *         description: 
+ *       - in: query
+ *         name: location
+ *         schema:
+ *           type: string
+ *         description: 
  *     responses:
  *       "200":
  *         description: OK

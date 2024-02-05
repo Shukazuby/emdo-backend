@@ -28,6 +28,7 @@ db.empHistory = require("./empHistory.model")(sequelizeInstance, Sequelize);
 db.referees = require("./empReferee.model")(sequelizeInstance, Sequelize);
 db.rightToWork = require("./rightToWork.model")(sequelizeInstance, Sequelize);
 db.cv = require("./cv.model")(sequelizeInstance, Sequelize);
+db.jobApply = require("./jobApply.model")(sequelizeInstance, Sequelize);
 
 // Relationships For Models
 
@@ -66,6 +67,14 @@ db.cv.belongsTo(db.employees);
 
 db.employees.hasMany(db.rightToWork);
 db.rightToWork.belongsTo(db.employees);
+
+db.users.hasMany(db.jobApply);
+db.jobApply.belongsTo(db.users);
+
+db.jobs.hasMany(db.jobApply);
+db.jobApply.belongsTo(db.jobs);
+
+// db.employees.belongsToMany(db.jobs, { through: db.jobApply, as: 'appliedJobs' });
 
 // Many-to-many Relationship
 
