@@ -116,60 +116,59 @@ const getUserJobApplications = async (id, options) => {
   return appliedJobs;
 };
 
-// const employerDecision = async (userId, applicationId, options) => {
-//   const user = await db.users.findOne({ where: { id: userId } });
-//   const application = await db.jobApply.findOne({
-//     where: { id: applicationId },
-//     include: [{ model: db.jobs, as: "job" }],
-//   });
+const getAppliedJobs = async (employerId, options) => {
+  const defaultOptions = {
+    limit: parseInt(options.limit),
+    offset: (parseInt(options.page) - 1) * parseInt(options.limit),
+  };
 
-//   if (!application) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Job application not found");
-//   }
+  const bothOptions = {
+    ...defaultOptions,
+  };
 
-//   if (user.id !== application.job.employerId) {
-//     throw new ApiError(
-//       httpStatus.UNAUTHORIZED,
-//       "Unauthorized: You did not post this job"
-//     );
-//   }
+  const jobs = await db.jobs.findAll({
+      where: { employerId }, 
+      include: [{
+          model: db.jobApply,
+          where: { status: 'applied' }, 
+          include: [{
+              model: db.users,
+              where: { userType: 'employee' }, 
+          }]
+      }],
+     bothOptions 
+  });
+  return jobs;
+};
+const getConfirmedJobs = async (employerId, options) => {
+  const defaultOptions = {
+    limit: parseInt(options.limit),
+    offset: (parseInt(options.page) - 1) * parseInt(options.limit),
+  };
 
-//   await application.update(options);
+  const bothOptions = {
+    ...defaultOptions,
+  };
 
-//   return application;
-// };
-
-// const employeeFinal = async (userId, applicationId, options) => {
-//   const user = await db.users.findOne({ where: { id: userId } });
-//   const application = await db.jobApply.findOne({
-//     where: { id: applicationId },
-//     include: [{ model: db.jobs, as: "job" }],
-//   });
-
-//   if (!application) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Job application not found");
-//   }
-
-//   if (user.id !== application.userId) {
-//     throw new ApiError(
-//       httpStatus.UNAUTHORIZED,
-//       "Unauthorized: You did not apply for this job"
-//     );
-//   }
-
-//   await application.update(options);
-
-//   if (options.status === "confirm") {
-//     await application.job.update({ noOfStaff: application.job.noOfStaff - 1 });
-//   }
-
-//   return application;
-// };
+  const jobs = await db.jobs.findAll({
+      where: { employerId }, 
+      include: [{
+          model: db.jobApply,
+          where: { status: 'confirmed' }, 
+          include: [{
+              model: db.users,
+              where: { userType: 'employee' }, 
+          }]
+      }],
+     bothOptions 
+  });
+  return jobs;
+};
 
 module.exports = {
   jobApplication,
   getUserJobApplications,
   jobApproval,
-  // employerDecision,
-  // employeeFinal,
+  getAppliedJobs,
+  getConfirmedJobs,
 };
