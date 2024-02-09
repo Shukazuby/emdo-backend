@@ -101,7 +101,7 @@ module.exports = router
  *           type: integer
  *           minimum: 1
  *         default: 10
- *         description: Maximum number of users
+ *         description: Maximum number of jobs
  *       - in: query
  *         name: page
  *         schema:
@@ -226,7 +226,7 @@ module.exports = router
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: job id
  *     responses:
  *       "200":
@@ -257,7 +257,7 @@ module.exports = router
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: job id
  *     requestBody:
  *       required: true
@@ -312,7 +312,7 @@ module.exports = router
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: job id
  *     responses:
  *       "200":

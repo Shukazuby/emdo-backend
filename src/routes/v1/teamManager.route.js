@@ -164,7 +164,7 @@ module.exports = router
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: employer id
  *     requestBody:
  *       required: true

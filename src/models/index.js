@@ -68,11 +68,18 @@ db.cv.belongsTo(db.employees);
 db.employees.hasMany(db.rightToWork);
 db.rightToWork.belongsTo(db.employees);
 
-db.users.hasMany(db.jobApply);
-db.jobApply.belongsTo(db.users);
+db.employees.belongsToMany(db.jobs,{ through: db.jobApply, as: 'appliedJobs'} )
+db.jobs.belongsToMany(db.employees,{through: db.jobApply, as:'application'})
+
+db.employees.hasMany(db.jobApply);
+db.jobApply.belongsTo(db.employees);
 
 db.jobs.hasMany(db.jobApply);
 db.jobApply.belongsTo(db.jobs);
+
+
+
+
 
 // db.employees.belongsToMany(db.jobs, { through: db.jobApply, as: 'appliedJobs' });
 

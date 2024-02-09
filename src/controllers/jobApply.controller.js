@@ -17,8 +17,7 @@ const createJobApplication = catchAsync(async (req, res) => {
 const jobApproval = catchAsync(async (req, res) => {
   const { id } = req.user;
   const { applicationId } = req.params;
-  const options = { status: req.query.status }; // Assuming status is provided via query params
-
+  const options = { status: req.query.status };
   const application = await jobApplyService.jobApproval(
     id,
     applicationId,
@@ -45,24 +44,37 @@ const getUserJobApplications = catchAsync(async (req, res) => {
 });
 
 const getAppliedJobs = catchAsync(async (req, res) => {
-  const { id } = req.user; 
-  const options = pick(req.query, ['limit', 'page']);
+  const { id } = req.user;
+  const options = pick(req.query, ["limit", "page"]);
   const appliedJobs = await jobApplyService.getAppliedJobs(id, options);
-  res.status(httpStatus.OK).send({ message: 'Applied jobs retrieved successfully', appliedJobs });
+  res
+    .status(httpStatus.OK)
+    .send({ message: "Applied jobs retrieved successfully", appliedJobs });
 });
 
 const getConfirmedJobs = catchAsync(async (req, res) => {
-  const { id } = req.user; 
-  const options = pick(req.query, ['limit', 'page']);
+  const { id } = req.user;
+  const options = pick(req.query, ["limit", "page"]);
   const confirmedJobs = await jobApplyService.getConfirmedJobs(id, options);
-  res.status(httpStatus.OK).send({ message: 'Confirmed jobs retrieved successfully', confirmedJobs });
+  res
+    .status(httpStatus.OK)
+    .send({ message: "Confirmed jobs retrieved successfully", confirmedJobs });
 });
 
+const getCompletedJobs = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const options = pick(req.query, ["limit", "page"]);
+  const completedJobs = await jobApplyService.getCompletedJobs(id, options);
+  res
+    .status(httpStatus.OK)
+    .send({ message: "Completed jobs retrieved successfully", completedJobs });
+});
 
 module.exports = {
   createJobApplication,
   getUserJobApplications,
   jobApproval,
   getAppliedJobs,
-  getConfirmedJobs
+  getConfirmedJobs,
+  getCompletedJobs,
 };

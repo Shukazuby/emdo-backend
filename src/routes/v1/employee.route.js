@@ -58,7 +58,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: employee id
  *     responses:
  *       "200":
@@ -89,7 +89,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: employee id
  *     responses:
  *       "200":
@@ -120,7 +120,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: employee id
  *     responses:
  *       "200":
@@ -236,7 +236,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: employee id
  *     responses:
  *       "200":
@@ -267,7 +267,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: employee id
  *     requestBody:
  *       required: true
@@ -311,7 +311,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: employee id
  *     responses:
  *       "200":
@@ -419,7 +419,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: cert id
  *     responses:
  *       "200":
@@ -450,7 +450,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: cert id
  *     requestBody:
  *       required: true
@@ -494,7 +494,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: cert id
  *     responses:
  *       "200":
@@ -612,7 +612,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: referee id
  *     responses:
  *       "200":
@@ -687,7 +687,7 @@ module.exports = router;
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: referee id
  *     responses:
  *       "200":

@@ -22,7 +22,7 @@ module.exports = router
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: job id
  *     responses:
  *       "200":

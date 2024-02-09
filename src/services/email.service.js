@@ -43,24 +43,6 @@ If you did not request any password resets, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
 
-// const employerEmailToken = async (to, otp, doctorID, doctorName, companyName) => {
-//     const subject = `Welcome to ${companyName}`;
-//     // replace this url with the link to the email verification page of your front-end app
-//     const otpDetails = `email: ${to}
-
-//                               otp:${otp}`;
-
-//       const otpLink = 'https://bitmedics-app.vercel.app/signin'
-
-//     const text = `To verify your email use the details
-
-//     Here is the details
-//     ${otpDetails}
-
-//     Login here: ${otpLink}`;
-//     await sendEmail(to, subject, text);
-//   };
-
 /**
  * Send verification email
  * @param {string} to
@@ -79,7 +61,6 @@ If you did not create an account, then ignore this email.`;
 
 const addedUser = async (to, id,) => {
   const subject = `Welcome to Emdo`;
-  // replace this url with the link to the email verification page of your front-end app
   const details = `email: ${to}
 
     password: Emdo@2024`;
@@ -91,10 +72,83 @@ const addedUser = async (to, id,) => {
   await sendEmail(to, subject, text);
 };
 
+// The Employer get this mail when a posted job is applied 
+const appliedJobEmail = async (to, title,) => {
+  const subject = `${title} Job Applied`;
+  const url = `https://job/applied`;
+  const text = `Dear Employer, 
+  
+Your ${title} job post has been applied by an employee.
+
+Click Here to approve or decline ${url}
+  `;
+
+  await sendEmail(to, subject, text);
+};
+
+// The Employee get this mail when a job application is approved by an employer
+
+const approvedJobEmail = async (to, title,) => {
+  const subject = `${title} Job Approved`;
+  const url = `https://job/applied`;
+  const text = `Dear Employee, 
+  
+Congratulation, your ${title} job application was approved by the employer.
+
+Click Here to confirm or reject ${url}
+  `;
+
+  await sendEmail(to, subject, text);
+};
+
+const declinedJobEmail = async (to, title,) => {
+  const subject = `${title} Job Approved`;
+  const text = `Dear Employee, 
+  
+Unfortunately, your ${title} job application was declined by the employer.
+  `;
+
+  await sendEmail(to, subject, text);
+};
+
+
+// The Employer get this mail when a job is confirmed by an employee
+const confirmedJobEmail = async (to, title,) => {
+  const subject = `${title} Job Confirmed`;
+  const url = `https://employee/info`;
+  const text = `Dear Employer, 
+  
+Your ${title} posted job was confirmed by the employee. Shift starts now.
+
+Click Here to view employee info ${url}
+  `;
+
+  await sendEmail(to, subject, text);
+};
+
+const rejectedJobEmail = async ( to, title,) => {
+  const subject = `${title} Job Confirmed`;
+  const url = `https://employee/info`;
+  const text = `Dear Employer, 
+  
+Your ${title} posted job was declined by the employee. 
+
+Click Here to view employee info ${url}
+  `;
+
+  await sendEmail(to, subject, text);
+};
+
+
 module.exports = {
   transport,
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
-  addedUser
+  addedUser,
+  approvedJobEmail,
+  appliedJobEmail,
+  confirmedJobEmail,
+  declinedJobEmail,
+  rejectedJobEmail
 };
