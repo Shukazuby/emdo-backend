@@ -29,6 +29,7 @@ db.referees = require("./empReferee.model")(sequelizeInstance, Sequelize);
 db.rightToWork = require("./rightToWork.model")(sequelizeInstance, Sequelize);
 db.cv = require("./cv.model")(sequelizeInstance, Sequelize);
 db.jobApply = require("./jobApply.model")(sequelizeInstance, Sequelize);
+db.reviews = require("./review.model")(sequelizeInstance, Sequelize);
 
 // Relationships For Models
 
@@ -76,6 +77,12 @@ db.jobApply.belongsTo(db.employees);
 
 db.jobs.hasMany(db.jobApply);
 db.jobApply.belongsTo(db.jobs);
+
+db.employees.hasMany(db.reviews);
+db.reviews.belongsTo(db.employees);
+
+db.employers.hasMany(db.reviews);
+db.reviews.belongsTo(db.employers);
 
 
 

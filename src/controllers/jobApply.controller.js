@@ -70,6 +70,35 @@ const getCompletedJobs = catchAsync(async (req, res) => {
     .send({ message: "Completed jobs retrieved successfully", completedJobs });
 });
 
+const getApprovedJobs = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const options = pick(req.query, ["limit", "page"]);
+  const approvedJobs = await jobApplyService.getApprovedJobs(id, options);
+  res
+    .status(httpStatus.OK)
+    .send({ message: "Approved jobs retrieved successfully", approvedJobs });
+});
+
+const getEmployeeCompletedJobs = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const options = pick(req.query, ["limit", "page"]);
+  const completedJobs = await jobApplyService.getEmployeeCompletedJobs(id, options);
+  res
+    .status(httpStatus.OK)
+    .send({ message: "Completed jobs retrieved successfully", completedJobs });
+});
+
+const getEmployeeRejectedJobs = catchAsync(async (req, res) => {
+  const { id } = req.user;
+  const options = pick(req.query, ["limit", "page"]);
+  const rejectedJobs = await jobApplyService.getEmployeeRejectedJobs(id, options);
+  res
+    .status(httpStatus.OK)
+    .send({ message: "Rejected jobs retrieved successfully", rejectedJobs });
+});
+
+
+
 module.exports = {
   createJobApplication,
   getUserJobApplications,
@@ -77,4 +106,7 @@ module.exports = {
   getAppliedJobs,
   getConfirmedJobs,
   getCompletedJobs,
+  getApprovedJobs,
+  getEmployeeCompletedJobs,
+  getEmployeeRejectedJobs,
 };

@@ -137,7 +137,7 @@ const jobApproval = async (userId, applicationId, options) => {
   return application;
 };
 
-const getUserJobApplications = async (id, options) => {
+const getUserJobApplications = async (employeeId, options) => {
   const defaultOptions = {
     limit: parseInt(options.limit),
     offset: (parseInt(options.page) - 1) * parseInt(options.limit),
@@ -147,13 +147,19 @@ const getUserJobApplications = async (id, options) => {
     ...defaultOptions
   }
 
+  const employee = await db.employees.findOne({
+    where:{
+      userId: employeeId
+    }
+  })
+
   const appliedJobs = await db.jobApply.findAll({
     where:{ 
-      userId: id,
+      employeeId: employee.id
     },
-    // include: {
-    //   model: db.jobs,
-    // },
+    include: {
+      model: db.jobs,
+    },
 
     ...bothOptions
   });
@@ -275,6 +281,90 @@ const getCompletedJobs = async (employerId, options) => {
   return jobs;
 };
 
+
+const getApprovedJobs = async (employeeId, options) => {
+  const defaultOptions = {
+    limit: parseInt(options.limit),
+    offset: (parseInt(options.page) - 1) * parseInt(options.limit),
+  };
+
+  const bothOptions = {
+    ...defaultOptions,
+  };
+
+  const employee = await db.employees.findOne({
+    where:{
+      userId: employeeId
+    }
+  })
+
+  const jobs = await db.jobApply.findAll({
+    where: {
+       employeeId: employee.id,
+       status: "approved"
+    },
+    ...bothOptions,
+  });
+  return jobs;
+};
+
+const getEmployeeCompletedJobs = async (employeeId, options) => {
+  let currentDate = new Date();
+  const defaultOptions = {
+    limit: parseInt(options.limit),
+    offset: (parseInt(options.page) - 1) * parseInt(options.limit),
+  };
+  const bothOptions = {
+    ...defaultOptions,
+  };
+
+  const employee = await db.employees.findOne({
+    where:{
+      userId: employeeId
+    }
+  })
+
+
+  const jobs = await db.jobs.findAndCountAll({
+    where: {
+      shiftEndDate: { [Op.lt]: currentDate },
+    },
+    //  attributes: ['id', 'title'],
+    include: [
+      {
+        model: db.jobApply,
+        where: {employeeId: employee.id,  status: "confirmed" },
+      },
+    ],
+    ...bothOptions
+  });
+  return jobs;
+};
+
+const getEmployeeRejectedJobs = async (employeeId, options) => {
+  const defaultOptions = {
+    limit: parseInt(options.limit),
+    offset: (parseInt(options.page) - 1) * parseInt(options.limit),
+  };
+  const bothOptions = {
+    ...defaultOptions,
+  };
+
+  const employee = await db.employees.findOne({
+    where:{
+      userId: employeeId
+    }
+  })
+
+
+  const jobs = await db.jobApply.findAndCountAll({
+    where: {employeeId: employee.id,  status: "rejected" },
+    ...bothOptions
+  });
+  return jobs;
+};
+
+
 module.exports = {
   jobApplication,
   getUserJobApplications,
@@ -282,4 +372,7 @@ module.exports = {
   getAppliedJobs,
   getConfirmedJobs,
   getCompletedJobs,
+  getApprovedJobs,
+  getEmployeeCompletedJobs,
+  getEmployeeRejectedJobs,
 };

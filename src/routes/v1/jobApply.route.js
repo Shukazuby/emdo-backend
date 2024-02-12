@@ -10,6 +10,9 @@ router.get('/job', auth(), jobApplyController.getUserJobApplications)
 router.get('/applied', auth(), jobApplyController.getAppliedJobs)
 router.get('/confirmed', auth(), jobApplyController.getConfirmedJobs)
 router.get('/completed', auth(), jobApplyController.getCompletedJobs)
+router.get('/approved', auth(), jobApplyController.getApprovedJobs)
+router.get('/employee/completed', auth(), jobApplyController.getEmployeeCompletedJobs)
+router.get('/employee/rejected', auth(), jobApplyController.getEmployeeRejectedJobs)
 
 module.exports = router
 

@@ -9,6 +9,7 @@ const jobRoute = require("./job.route");
 const uploadRoute = require("./upload.route");
 const teamRoute = require("./teamManager.route");
 const applyRoute = require("./jobApply.route");
+const reviewRoute = require("./review.route");
 
 const defaultRoutes = [
   {
@@ -39,6 +40,10 @@ const defaultRoutes = [
   {
     path: "/apply",
     route: applyRoute,
+  },
+  {
+    path: "/review",
+    route: reviewRoute,
   }
 ];
 
