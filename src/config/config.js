@@ -22,6 +22,7 @@ const envVarsSchema = Joi.object()
     CLOUD_NAME: Joi.string(),
     API_KEY: Joi.string(),
     API_SECRET: Joi.string(),
+    STRIPE_KEY: Joi.string(),
   })
   .unknown();
 
@@ -65,5 +66,8 @@ module.exports = {
     cloudName: envVars.CLOUD_NAME,
     apiKey: envVars.API_KEY,
     apiSecret: envVars.API_SECRET,
+  },
+ stripe: {
+  stripeKey: envVars.STRIPE_KEY
   }
   };

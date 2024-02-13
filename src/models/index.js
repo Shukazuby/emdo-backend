@@ -30,6 +30,9 @@ db.rightToWork = require("./rightToWork.model")(sequelizeInstance, Sequelize);
 db.cv = require("./cv.model")(sequelizeInstance, Sequelize);
 db.jobApply = require("./jobApply.model")(sequelizeInstance, Sequelize);
 db.reviews = require("./review.model")(sequelizeInstance, Sequelize);
+db.plans = require("./plan.model")(sequelizeInstance, Sequelize);
+db.payment = require("./payment.model")(sequelizeInstance, Sequelize);
+db.subscription = require("./subscription.model")(sequelizeInstance, Sequelize);
 
 // Relationships For Models
 
@@ -84,9 +87,14 @@ db.reviews.belongsTo(db.employees);
 db.employers.hasMany(db.reviews);
 db.reviews.belongsTo(db.employers);
 
+db.employees.hasMany(db.payment);
+db.payment.belongsTo(db.employees);
 
+db.employees.hasMany(db.subscription);
+db.subscription.belongsTo(db.employees);
 
-
+db.plans.hasMany(db.subscription)
+db.subscription.belongsTo(db.plans)
 
 // db.employees.belongsToMany(db.jobs, { through: db.jobApply, as: 'appliedJobs' });
 

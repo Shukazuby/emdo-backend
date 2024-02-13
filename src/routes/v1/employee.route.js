@@ -1,5 +1,5 @@
 const express = require("express");
-const employeeController = require("../../controllers/employee.controller");
+const {employeeController} = require("../../controllers/");
 const auth = require("../../middlewares/auth");
 const { multerUploads } = require("../../config/multer");
 

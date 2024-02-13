@@ -374,5 +374,5 @@ module.exports = {
   getCompletedJobs,
   getApprovedJobs,
   getEmployeeCompletedJobs,
-  getEmployeeRejectedJobs,
+getEmployeeRejectedJobs,
 };
