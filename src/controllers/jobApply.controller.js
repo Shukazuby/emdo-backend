@@ -46,7 +46,7 @@ const getUserJobApplications = catchAsync(async (req, res) => {
 const getAppliedJobs = catchAsync(async (req, res) => {
   const { id } = req.user;
   const options = pick(req.query, ["limit", "page"]);
-  const appliedJobs = await jobApplyService.getAppliedJobs(id, options);
+const appliedJobs = await jobApplyService.getAppliedJobs(id, options);
   res
     .status(httpStatus.OK)
     .send({ message: "Applied jobs retrieved successfully", appliedJobs });

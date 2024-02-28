@@ -11,6 +11,8 @@ const teamRoute = require("./teamManager.route");
 const applyRoute = require("./jobApply.route");
 const reviewRoute = require("./review.route");
 const planRoute = require("./plan.route");
+const messageRoute = require("./message.route");
+const adminRoute = require("./admin.route");
 
 const defaultRoutes = [
   {
@@ -49,7 +51,15 @@ const defaultRoutes = [
   {
     path: "/plan",
     route: planRoute,
-  }
+  },
+  {
+    path: "/messages",
+    route: messageRoute,
+  },
+  {
+    path: "/admins",
+    route: adminRoute,
+  },
 ];
 
 const devRoutes = [

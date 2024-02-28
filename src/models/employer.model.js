@@ -53,6 +53,12 @@ cRepPersonalEmail: {
   type: dataType.STRING,
   trim: true,
 },
+verification: {
+  type: dataType.ENUM('verified', 'rejected', 'pending'),
+  defaultValue: 'pending',
+  trim: true,
+},
+
 });
 
   return employer;

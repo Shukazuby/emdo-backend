@@ -4,15 +4,15 @@ const auth = require('../../middlewares/auth');
 
 const router = express.Router()
 
-router.post('/:jobId', auth(), jobApplyController.createJobApplication)
-router.patch('/:applicationId', auth(), jobApplyController.jobApproval);
-router.get('/job', auth(), jobApplyController.getUserJobApplications)
-router.get('/applied', auth(), jobApplyController.getAppliedJobs)
-router.get('/confirmed', auth(), jobApplyController.getConfirmedJobs)
-router.get('/completed', auth(), jobApplyController.getCompletedJobs)
-router.get('/approved', auth(), jobApplyController.getApprovedJobs)
-router.get('/employee/completed', auth(), jobApplyController.getEmployeeCompletedJobs)
-router.get('/employee/rejected', auth(), jobApplyController.getEmployeeRejectedJobs)
+router.post('/:jobId', auth('applyJob'), jobApplyController.createJobApplication)
+router.patch('/:applicationId', auth('jobApproval'), jobApplyController.jobApproval);
+router.get('/job', auth('applyJob'), jobApplyController.getUserJobApplications)
+router.get('/applied', auth('appliedJob'), jobApplyController.getAppliedJobs)
+router.get('/confirmed', auth('appliedJob'), jobApplyController.getConfirmedJobs)
+router.get('/completed', auth('appliedJob'), jobApplyController.getCompletedJobs)
+router.get('/approved', auth('applyJob'), jobApplyController.getApprovedJobs)
+router.get('/employee/completed', auth('applyJob'), jobApplyController.getEmployeeCompletedJobs)
+router.get('/employee/rejected', auth('applyJob'), jobApplyController.getEmployeeRejectedJobs)
 
 module.exports = router
 
@@ -329,3 +329,148 @@ module.exports = router
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  */
+
+/**
+ * @swagger
+ * /apply/approved:
+ *   get:
+ *     summary: Get approved jobs by employees
+ *     description: Employees retrieve approved posted jobs.
+ *     tags: [JobApply]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         default: 10
+ *         description: Maximum number of users
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+
+/**
+ * @swagger
+ * /apply/employee/completed:
+ *   get:
+ *     summary: Get completed jobs by employees
+ *     description: Employees retrieve completed applied jobs.
+ *     tags: [JobApply]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         default: 10
+ *         description: Maximum number of users
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+
+/**
+ * @swagger
+ * /apply/employee/rejected:
+ *   get:
+ *     summary: Get rejected jobs by employees
+ *     description: Employees retrieve their applied jobs rejected by employers.
+ *     tags: [JobApply]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         default: 10
+ *         description: Maximum number of users
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+

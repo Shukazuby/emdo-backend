@@ -7,8 +7,6 @@ const { tokenTypes } = require("../config/tokens");
 const bcrypt = require("bcryptjs");
 const moment = require("moment");
 
-
-
 const emailExist = async (email) => {
   const user = await db.users.findOne({
     where: {
@@ -36,7 +34,6 @@ const createEmployer = async (employerBody) => {
 const createEmployee = async (employeeBody) => {
   return db.employers.create(employeeBody);
 };
-
 
 /**
  * creates a user
@@ -143,7 +140,7 @@ const verifyEmail = async (verifyEmailToken) => {
       where: { token: verifyEmailToken, type: tokenTypes.VERIFY_EMAIL },
     });
     if (!verifyEmailTokenDoc) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Verification token not found');
+      throw new ApiError(httpStatus.NOT_FOUND, "Verification token not found");
     }
 
     // Check if the token has expired
@@ -151,11 +148,14 @@ const verifyEmail = async (verifyEmailToken) => {
     const tokenExpiration = moment(verifyEmailTokenDoc.expires);
 
     if (currentTimestamp.isAfter(tokenExpiration)) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Verification token has expired');
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Verification token has expired"
+      );
     }
     const user = await userService.getUserById(verifyEmailTokenDoc.user);
     if (!user) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+      throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
     await db.tokens.destroy({
       where: { user: user.id, type: tokenTypes.VERIFY_EMAIL },
@@ -163,6 +163,39 @@ const verifyEmail = async (verifyEmailToken) => {
     await userService.updateUserById(user.id, { isEmailVerified: true });
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, error.message);
+  }
+};
+
+const verifyEmployee = async (id, employeeId, data) => {
+  const user = await db.users.findOne({ where: { id } });
+
+  const employee = await db.employees.findOne({
+    where: {
+      id: employeeId,
+    },
+    include: { model: db.users },
+  });
+  if (employee.verification === "pending" || "null") {
+    const updateVerification = await employee.update({
+      verification: data,
+    });
+    return updateVerification;
+  }
+};
+const verifyEmployer = async (id, employerId, data, options) => {
+  const user = await db.users.findOne({ where: { id } });
+
+  const employer = await db.employers.findOne({
+    where: {
+      id: employerId,
+    },
+    include: { model: db.users },
+  });
+  if (employer.verification === "pending" || "null") {
+    const updateVerification = await employer.update({
+      verification: data,
+    });
+    return updateVerification;
   }
 };
 
@@ -176,4 +209,6 @@ module.exports = {
   resetPassword,
   verifyEmail,
   emailExist,
+  verifyEmployee,
+  verifyEmployer,
 };

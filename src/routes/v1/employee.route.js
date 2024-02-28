@@ -29,6 +29,13 @@ router.get('/cert/:certId', auth(),employeeController.getCert);
 router.get('/referee', auth(), employeeController.getRefereeByAnEmployee);
 router.get('/referee/:refereeId', auth(),employeeController.getReferee);
 
+// Admin Rights
+router.get('/emp/status', auth('getNewEmployee'), employeeController.getAllNewEmployees)
+router.get("/emp/emp/:employeeId", auth('getEmployeeData'), employeeController.adminGetAllEmployeeData);
+router.get('/emp/all', auth('getAllEmployees'), employeeController.getAllEmployees)
+router.get('/emp/approved', auth('getApprovedEmployees'), employeeController.getApprovedEmployees)
+router.get('/emp/approved/:employeeId', auth('getApprovedEmployees'), employeeController.getAnApprovedEmployee)
+
 // Patch Request
 router.patch("/:id", employeeController.updateEmployee);
 router.patch('/history/:empHistoryId', auth(),  employeeController.updateHistory)
@@ -41,6 +48,7 @@ router.delete('/cert/:certId', auth(), employeeController.deleteCert);
 router.delete('/referee/:refereeId', auth(), employeeController.deleteReferee);
 router.delete('/cv/:cvId', auth(), employeeController.deleteCv);
 router.delete('/rtw/:rtwId', auth(), employeeController.deleteRtw);
+router.delete('/emp/approved/:employeeId', auth('getApprovedEmployees'), employeeController.deleteAnApprovedEmployee);
 
 module.exports = router;
 
@@ -699,3 +707,201 @@ module.exports = router;
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
+
+/**
+ * @swagger
+ * /employees/emp/all:
+ *   get:
+ *     summary: Get all employees by admin
+ *     description: 
+ *     tags: [admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/User'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /employees/emp/approved:
+ *   get:
+ *     summary: Get all approved employees by admin
+ *     description: 
+ *     tags: [admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/User'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /employees/emp/approved/{employeeId}: 
+ *   get:
+ *     summary: get an approved employee by admin
+ *     description: 
+ *     tags: [admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: employee id
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/User'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /employees/emp/emp/{employeeId}:
+ *   get:
+ *     summary: Get an employee details by admin
+ *     description: 
+ *     tags: [admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: employee id
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/User'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /employees/emp/approved/{employeeId}:
+ *   delete:
+ *     summary: delete an approved employee details by admin
+ *     description: 
+ *     tags: [admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: employeeId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: employee id
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/User'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
+
+/**
+ * @swagger
+ * /employers/emp/status:
+ *   get:
+ *     summary: Get new employees
+ *     description: Retrieve new posted employees.
+ *     tags: [admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: status new
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         default: 10
+ *         description: Maximum number of employees
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 status:
+ *                   type: string
+ *                   example: new
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+

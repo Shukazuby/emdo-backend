@@ -5,47 +5,37 @@ const { userService, jobService, employerService, emailService } = require(".");
 const { Op } = require("sequelize");
 
 const jobApplication = async (id, jobId) => {
-  const user = await userService.getUserById(id);
-  const job = await jobService.getJobsById(jobId);
-  const employee = await db.employees.findOne({
-    where:{
-      userId: id
-    }
-  })
-
+  const user = await db.users.findOne({where:{ id }});
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
+  const job = await db.jobs.findOne({ where: { id: jobId } });
   if (!job) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Job not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "job not found");
   }
+  const employee = await db.employees.findOne({
+    where: {
+      userId: user.id,
+    },
+  });
 
   if (job.noOfStaff === 0) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "You can not apply for this job"
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST, "You can not apply for this job");
   }
 
   const existingApplication = await db.jobApply.findOne({
     where: {
-      employeeId: id,
+      employeeId: employee.id,
       jobId,
     },
   });
 
   if (existingApplication) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "You have previously applied for the job"
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST,"You have previously applied for the job");
   }
 
   if (user.userType !== "employee") {
-    throw new ApiError(
-      httpStatus.UNAUTHORIZED,
-      "You are not authorized to apply for this job"
-    );
+    throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized to apply for this job");
   }
   await emailService.appliedJobEmail(user.email, job.title);
 
@@ -56,8 +46,11 @@ const jobApplication = async (id, jobId) => {
   return applyJob;
 };
 
-const jobApproval = async (userId, applicationId, options) => {
-  const user = await db.users.findOne({ where: { id: userId } });
+const jobApproval = async (id, applicationId, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
   const application = await db.jobApply.findOne({
     where: { id: applicationId },
     include: [{ model: db.jobs }],
@@ -68,27 +61,28 @@ const jobApproval = async (userId, applicationId, options) => {
   }
 
   if (user.userType === "employer") {
+    const employer = await db.employers.findOne({ where: { userId: user.id } });
+
     if (options.status !== "approved" && options.status !== "declined") {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "Employers can only 'approved' or 'declined' job applications"
-      );
+      throw new ApiError(httpStatus.BAD_REQUEST,"Employers can only 'approved' or 'declined' job applications");
     }
-    if (user.id !== application.job.employerId) {
-      throw new ApiError(
-        httpStatus.UNAUTHORIZED,
-        "Unauthorized: You did not post this job"
-      );
+    if (employer.id !== application.job.employerId) {
+      throw new ApiError( httpStatus.UNAUTHORIZED, "Unauthorized: You did not post this job");
     }
 
     if (options.status === "approved") {
       await application.update(options);
-      const applicant = await db.users.findOne({
-        where: { id: application.userId },
+      await db.jobs.update(
+        { status: "ongoing" },
+        {where: {id: application.jobId}}
+      );
+      const applicant = await db.employees.findOne({
+        where: { id: application.employeeId },
+        include:[{model:db.users}]
       });
       if (applicant) {
         await emailService.approvedJobEmail(
-          applicant.email,
+          applicant.user.email,
           application.job.title
         );
       }
@@ -97,33 +91,41 @@ const jobApproval = async (userId, applicationId, options) => {
       await emailService.declinedJobEmail(user.email, application.job.title);
     }
   } else if (user.userType === "employee") {
-    if (options.status !== "confirmed" && options.status !== "rejected") {
+
+    const employer = await db.employers.findOne({
+      where: { id: application.job.employerId },
+      include:{model: db.users}
+    });
+
+    const employee = await db.employers.findOne({ where: { userId: user.id } });
+    if (!employee) {
+      throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+    }
+      if (options.status !== "confirmed" && options.status !== "rejected") {
       throw new ApiError(
         httpStatus.BAD_REQUEST,
         "Employees can only 'confirmed' or 'rejected' job applications"
       );
     }
-    if (user.id !== application.userId) {
+    if (user.id !== application.employeeId) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         "Unauthorized: You did not apply for this job"
       );
     }
-    const employer = await db.users.findOne({
-      where: { id: application.job.employerId },
-    });
+
     await application.update(options);
     if (options.status === "confirmed") {
       await application.job.update({
         noOfStaff: application.job.noOfStaff - 1,
       });
       await emailService.confirmedJobEmail(
-        employer.email,
+        employer.user.email,
         application.job.title
       );
     } else {
       await emailService.rejectedJobEmail(
-        employer.email,
+        employer.user.email,
         application.job.title
       );
     }
@@ -137,39 +139,57 @@ const jobApproval = async (userId, applicationId, options) => {
   return application;
 };
 
-const getUserJobApplications = async (employeeId, options) => {
+const getUserJobApplications = async (id, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
   const defaultOptions = {
     limit: parseInt(options.limit),
     offset: (parseInt(options.page) - 1) * parseInt(options.limit),
   };
 
-  const bothOptions ={
-    ...defaultOptions
-  }
+  const bothOptions = {
+    ...defaultOptions,
+  };
 
   const employee = await db.employees.findOne({
-    where:{
-      userId: employeeId
-    }
-  })
+    where: {
+      userId: user.id,
+    },
+  });
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
 
   const appliedJobs = await db.jobApply.findAll({
-    where:{ 
-      employeeId: employee.id
+    where: {
+      employeeId: employee.id,
     },
     include: {
       model: db.jobs,
     },
 
-    ...bothOptions
+    ...bothOptions,
   });
   if (!appliedJobs) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "You don't have any job you applied for");
   }
   return appliedJobs;
 };
 
-const getAppliedJobs = async (employerId, options) => {
+const getAppliedJobs = async (id, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employer = await db.employers.findOne({where:{ userId: user.id }});
+  if (!employer) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employer not found");
+  }
+
   const defaultOptions = {
     limit: parseInt(options.limit),
     offset: (parseInt(options.page) - 1) * parseInt(options.limit),
@@ -180,47 +200,54 @@ const getAppliedJobs = async (employerId, options) => {
   };
 
   const jobs = await db.jobs.findAll({
-    where: { employerId},
+    where: { employerId: employer.id },
     include: [
       {
         model: db.jobApply,
-        where: { status: "applied" },
+        where: { status: "applied" }, 
         include: [
           {
             model: db.employees,
-            include: [{
-              model: db.users
-             }],
+            include: [
+              {
+                model: db.users,
+              },
+            ],
           },
         ],
       },
     ],
     ...bothOptions,
   });
+  if (!jobs) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Applied jobs not found");
+  }
+
   return jobs;
 };
 
-const getConfirmedJobs = async (employerId, options) => {
+const getConfirmedJobs = async (id, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employer = await db.employers.findOne({where:{ userId: user.id }});
+  if (!employer) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employer not found");
+  }
   const defaultOptions = {
     limit: parseInt(options.limit),
     offset: (parseInt(options.page) - 1) * parseInt(options.limit),
   };
 
-  console.log(defaultOptions)
-
   const bothOptions = {
     ...defaultOptions,
   };
 
-  const employer = await db.employers.findOne({
-    where:{
-      userId: employerId
-    }
-  })
-
   const jobs = await db.jobs.findAll({
     where: {
-       employerId: employer.id 
+      employerId: employer.id,
     },
     include: [
       {
@@ -229,13 +256,12 @@ const getConfirmedJobs = async (employerId, options) => {
         include: [
           {
             model: db.employees,
-            include:[ 
+            include: [
               {
-                model: db.users
-              }
+                model: db.users,
+              },
             ],
           },
-          
         ],
       },
     ],
@@ -244,7 +270,17 @@ const getConfirmedJobs = async (employerId, options) => {
   return jobs;
 };
 
-const getCompletedJobs = async (employerId, options) => {
+const getCompletedJobs = async (id, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employer = await db.employers.findOne({where:{ userId: user.id }});
+  if (!employer) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employer not found");
+  }
+
   let currentDate = new Date();
   const defaultOptions = {
     limit: parseInt(options.limit),
@@ -257,32 +293,44 @@ const getCompletedJobs = async (employerId, options) => {
 
   const jobs = await db.jobs.findAndCountAll({
     where: {
-      employerId,
+      employerId: employer.id,
       shiftEndDate: { [Op.lt]: currentDate },
     },
-    //  attributes: ['id', 'title'],
     include: [
       {
         model: db.jobApply,
         where: { status: "confirmed" },
-        // attributes: ['id', 'status'],
         include: [
           {
             model: db.employees,
-            include:{
-              model: db.users
-            }
+            include: {
+              model: db.users,
+            },
           },
         ],
       },
     ],
-    ...bothOptions
+    ...bothOptions,
   });
+
+  if (!jobs) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Confirmed jobs not found");
+  }
+
   return jobs;
 };
 
+const getApprovedJobs = async (id, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
 
-const getApprovedJobs = async (employeeId, options) => {
+  const employee = await db.employees.findOne({where:{ userId: user.id }});
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
+
   const defaultOptions = {
     limit: parseInt(options.limit),
     offset: (parseInt(options.page) - 1) * parseInt(options.limit),
@@ -291,24 +339,32 @@ const getApprovedJobs = async (employeeId, options) => {
   const bothOptions = {
     ...defaultOptions,
   };
-
-  const employee = await db.employees.findOne({
-    where:{
-      userId: employeeId
-    }
-  })
 
   const jobs = await db.jobApply.findAll({
     where: {
-       employeeId: employee.id,
-       status: "approved"
+      employeeId: employee.id,
+      status: "approved",
     },
     ...bothOptions,
   });
+  if (!jobs) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No Approved jobs yet");
+  }
+
   return jobs;
 };
 
-const getEmployeeCompletedJobs = async (employeeId, options) => {
+const getEmployeeCompletedJobs = async (id, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employee = await db.employees.findOne({where:{ userId: user.id }});
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
+
   let currentDate = new Date();
   const defaultOptions = {
     limit: parseInt(options.limit),
@@ -318,30 +374,37 @@ const getEmployeeCompletedJobs = async (employeeId, options) => {
     ...defaultOptions,
   };
 
-  const employee = await db.employees.findOne({
-    where:{
-      userId: employeeId
-    }
-  })
-
-
   const jobs = await db.jobs.findAndCountAll({
     where: {
       shiftEndDate: { [Op.lt]: currentDate },
     },
-    //  attributes: ['id', 'title'],
     include: [
       {
         model: db.jobApply,
-        where: {employeeId: employee.id,  status: "confirmed" },
+        where: { employeeId: employee.id, status: "confirmed" },
       },
     ],
-    ...bothOptions
+    ...bothOptions,
   });
+
+  if (!jobs) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No completed jobs found");
+  }
+
   return jobs;
 };
 
-const getEmployeeRejectedJobs = async (employeeId, options) => {
+const getEmployeeRejectedJobs = async (id, options) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employee = await db.employees.findOne({where:{ userId: user.id }});
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
+
   const defaultOptions = {
     limit: parseInt(options.limit),
     offset: (parseInt(options.page) - 1) * parseInt(options.limit),
@@ -350,20 +413,16 @@ const getEmployeeRejectedJobs = async (employeeId, options) => {
     ...defaultOptions,
   };
 
-  const employee = await db.employees.findOne({
-    where:{
-      userId: employeeId
-    }
-  })
-
-
   const jobs = await db.jobApply.findAndCountAll({
-    where: {employeeId: employee.id,  status: "rejected" },
-    ...bothOptions
+    where: { employeeId: employee.id, status: "rejected" },
+    ...bothOptions,
   });
+  if (!jobs) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No rejected jobs not found");
+  }
+
   return jobs;
 };
-
 
 module.exports = {
   jobApplication,
@@ -374,5 +433,5 @@ module.exports = {
   getCompletedJobs,
   getApprovedJobs,
   getEmployeeCompletedJobs,
-getEmployeeRejectedJobs,
+  getEmployeeRejectedJobs,
 };

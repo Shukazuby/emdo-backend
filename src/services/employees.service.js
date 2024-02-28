@@ -6,105 +6,79 @@ const { userService } = require(".");
 const { dataUri } = require("../config/multer");
 const { uploader } = require("../config/cloudinary");
 
-/**
- * creates a subject
- * @param {Object} employeeBody
- * @returns {Promise<Object>}
- */
-const createEmployee = async (id, employeeBody,file) => {
-  const user = await db.users.findOne({
-    where: {
-      id,
-    },
-  });
-
+const createEmployee = async (id, employeeBody, file) => {
+  const user = await db.users.findOne({ where: { id } });
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
 
   const fileUri = dataUri(file);
-    
+
   const uploadFile = await uploader.upload(fileUri.content);
-  
+
   const employee = db.employees.create({
     ...employeeBody,
-    cv: uploadFile.secure_url, 
-    rightToWork: uploadFile.secure_url, 
+    cv: uploadFile.secure_url,
+    rightToWork: uploadFile.secure_url,
     userId: user.id,
   });
-
-  if (!employee) {
-    throw new ApiError(httpStatus.NOT_FOUND, "employer not found");
-  }
   return employee;
 };
 
 const updateEmployee = async (updateBody, id) => {
-  const user = await db.users.findOne({
-    where: {
-      id,
-    },
-  });
-
+  const user = await db.users.findOne({ where: { id } });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
   await db.users.update(updateBody, {
-    where: {
-      id,
-    },
+    where: { id },
   });
   if (updateBody.email && (await userService.isEmailTaken(updateBody.email))) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
 
   const updateEmployee = db.employees.update(updateBody, {
-    where: {
-      userId: user.id,
-    },
+    where: { userId: user.id },
   });
   return updateEmployee;
 };
 
-const getEmployeeByUserId = async (id) => {
-  const employee = db.employees.findOne({ where: { id } });
-  if(!employee){
-    throw new ApiError(httpStatus.NOT_FOUND, 'employee not found')
-  }
-  return employee;
-};
+// const getEmployeeByUserId = async (id) => {
+//   const employee = db.employees.findOne({ where: { id } });
+//   if (!employee) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+//   }
+//   return employee;
+// };
 
 const getAllEmployeeData = async (id) => {
-  const employees = db.users.findByPk(id, {
-    include: [
-      {
-        model: db.employees,
-        as: 'employee',
-      },
-    ],
+  const user = await db.users.findOne({
+    where: { id },
+    include: { model: db.employees },
   });
-
-  if(!employees){
-    throw new ApiError(httpStatus.NOT_FOUND, 'employer not found')
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
-
-  return employees;
+  return user;
 };
 
 /** 
 Employment History Service
 */
 const addEmpHistory = async (id, data) => {
-  const user = await db.users.findOne({
-    where:{
-      id
-    }
-  });
+  const user = await db.users.findOne({ where: { id } });
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
-  const employee = await db.employees.findOne({ 
-    where: { 
-      userId: user.dataValues.id 
-    } 
+  const employee = await db.employees.findOne({
+    where: {
+      userId: user.id,
+    },
   });
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
+
   const empHistory = await db.empHistory.create({
     ...data,
     employeeId: employee.id,
@@ -115,16 +89,24 @@ const addEmpHistory = async (id, data) => {
 
 const getHistoryById = async (id) => {
   const history = await db.empHistory.findByPk(id);
+  if (!history) {
+    throw new ApiError(httpStatus.NOT_FOUND, "history not found");
+  }
+
   return history;
 };
 
 const getHistoryByAnEmployee = async (employeeId) => {
   const history = await db.empHistory.findAll({ where: { employeeId } });
+  if (!history) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No history not found");
+  }
+
   return history;
 };
 
 const updateHistoryById = async (empHistoryId, data) => {
-  const history = await db.empHistory.findOne({ where: {empHistoryId}});
+  const history = await db.empHistory.findOne({ where: { empHistoryId } });
   if (!history) {
     throw new ApiError(httpStatus.NOT_FOUND, "Employee History not found");
   }
@@ -133,7 +115,7 @@ const updateHistoryById = async (empHistoryId, data) => {
 };
 
 const deleteHistoryById = async (empHistoryId) => {
-  const history = await db.empHistory.findOne({ where: {empHistoryId}});
+  const history = await db.empHistory.findOne({ where: { empHistoryId } });
   if (!history) {
     throw new ApiError(httpStatus.NOT_FOUND, "Employee History not found");
   }
@@ -150,27 +132,27 @@ Employee Training Certificate Service
 */
 
 const addEmpCert = async (id, data, file) => {
-  const user = await db.users.findOne({
-    where:{
-      id
-    }
-  });
+  const user = await db.users.findOne({ where: { id } });
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
-  const employee = await db.employees.findOne({ 
-    where: { 
-      userId: user.dataValues.id 
-    } 
+  const employee = await db.employees.findOne({
+    where: {
+      userId: user.id,
+    },
   });
 
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
+
   const fileUri = dataUri(file);
-    
+
   const uploadCertFile = await uploader.upload(fileUri.content);
-  
+
   const empCert = await db.empCerts.create({
     ...data,
-    certFile: uploadCertFile.secure_url, 
+    certFile: uploadCertFile.secure_url,
     employeeId: employee.dataValues.id,
   });
 
@@ -179,32 +161,44 @@ const addEmpCert = async (id, data, file) => {
 
 const getCertsById = async (id) => {
   const certs = await db.empCerts.findByPk(id);
+  if (!certs) {
+    throw new ApiError(httpStatus.NOT_FOUND, "certs not found");
+  }
+
   return certs;
 };
 
 const getCertsByAnEmployee = async (employeeId) => {
   const certs = await db.empCerts.findAll({ where: { employeeId } });
+  if (!certs) {
+    throw new ApiError(httpStatus.NOT_FOUND, "certs not found");
+  }
+
   return certs;
 };
 
 const updateCertById = async (certId, data) => {
-  const cert = await db.empCerts.findOne({ where: {certId}});
+  const cert = await db.empCerts.findOne({ where: { certId } });
   if (!cert) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Certificate or Training not found");
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "Certificate or Training not found"
+    );
   }
   const updatedCert = await cert.update(data);
   return updatedCert;
 };
 
 const deleteCertById = async (certId) => {
-  const cert = await db.empCerts.findOne({ where: {certId}});
+  const cert = await db.empCerts.findOne({ where: { certId } });
   if (!cert) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Certificate or Training not found");
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "Certificate or Training not found"
+    );
   }
   await db.empCerts.destroy({
-    where: {
-      id: certId,
-    },
+    where: { id: certId },
   });
   return cert;
 };
@@ -214,27 +208,24 @@ Employee Cv
 */
 
 const addCv = async (id, data, file) => {
-  const user = await db.users.findOne({
-    where:{
-      id
-    }
-  });
+  const user = await db.users.findOne({ where: { id } });
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
-  const employee = await db.employees.findOne({ 
-    where: { 
-      userId: user.dataValues.id 
-    } 
+  const employee = await db.employees.findOne({
+    where: { userId: user.id },
   });
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
 
   const fileUri = dataUri(file);
-    
+
   const uploadCv = await uploader.upload(fileUri.content);
-  
+
   const createCv = await db.cv.create({
     ...data,
-    cv: uploadCv.secure_url, 
+    cv: uploadCv.secure_url,
     employeeId: employee.dataValues.id,
   });
 
@@ -243,16 +234,22 @@ const addCv = async (id, data, file) => {
 
 const getCvById = async (id) => {
   const cv = await db.cv.findByPk(id);
+  if (!cv) {
+    throw new ApiError(httpStatus.NOT_FOUND, "cv not found");
+  }
   return cv;
 };
 
 const getCvByAnEmployee = async (employeeId) => {
   const cv = await db.cv.findAll({ where: { employeeId } });
+  if (!cv) {
+    throw new ApiError(httpStatus.NOT_FOUND, "cv not found");
+  }
   return cv;
 };
 
 const deleteCvById = async (cvId) => {
-  const cv = await db.cv.findOne({ where: {cvId}});
+  const cv = await db.cv.findOne({ where: { cvId } });
   if (!cv) {
     throw new ApiError(httpStatus.NOT_FOUND, "cv not found");
   }
@@ -264,32 +261,28 @@ const deleteCvById = async (cvId) => {
   return cv;
 };
 
-/** 
-* Employee Right to work
-*/
+/**
+ * Employee Right to work
+ */
 
 const addRtw = async (id, data, file) => {
-  const user = await db.users.findOne({
-    where:{
-      id
-    }
-  });
+  const user = await db.users.findOne({ where: { id } });
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
-  const employee = await db.employees.findOne({ 
-    where: { 
-      userId: user.dataValues.id 
-    } 
+  const employee = await db.employees.findOne({
+    where: {
+      userId: user.id,
+    },
   });
 
   const fileUri = dataUri(file);
-    
+
   const uploadRtw = await uploader.upload(fileUri.content);
-  
+
   const createRtw = await db.rightToWork.create({
     ...data,
-    rightToWork: uploadRtw.secure_url, 
+    rightToWork: uploadRtw.secure_url,
     employeeId: employee.dataValues.id,
   });
 
@@ -298,16 +291,23 @@ const addRtw = async (id, data, file) => {
 
 const getRtwById = async (id) => {
   const rtw = await db.rightToWork.findByPk(id);
+  if (!rtw) {
+    throw new ApiError(httpStatus.NOT_FOUND, "right to work not found");
+  }
+
   return rtw;
 };
 
 const getRtwByAnEmployee = async (employeeId) => {
   const rtw = await db.rightToWork.findAll({ where: { employeeId } });
+  if (!rtw) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No right to work not found");
+  }
   return rtw;
 };
 
 const deleteRtwById = async (rtwId) => {
-  const rtw = await db.rightToWork.findOne({ where: {rtwId}});
+  const rtw = await db.rightToWork.findOne({ where: { rtwId } });
   if (!rtw) {
     throw new ApiError(httpStatus.NOT_FOUND, "Right to work not found");
   }
@@ -319,25 +319,23 @@ const deleteRtwById = async (rtwId) => {
   return rtw;
 };
 
-
 /** 
 Employee Referee Service
 */
 
 const addReferee = async (id, data) => {
-  const user = await db.users.findOne({
-    where:{
-      id
-    }
-  });
+  const user = await db.users.findOne({ where: { id } });
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
-  const employee = await db.employees.findOne({ 
-    where: { 
-      userId: user.dataValues.id 
-    } 
+  const employee = await db.employees.findOne({
+    where: {
+      userId: user.id,
+    },
   });
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
 
   const referee = await db.referees.create({
     ...data,
@@ -349,16 +347,23 @@ const addReferee = async (id, data) => {
 
 const getRefereeById = async (id) => {
   const referee = await db.referees.findByPk(id);
+  if (!referee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "referee not found");
+  }
+
   return referee;
 };
 
 const getRefereeByAnEmployee = async (employeeId) => {
   const referee = await db.referees.findAll({ where: { employeeId } });
+  if (!referee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No referee not found");
+  }
   return referee;
 };
 
 const updateRefereeById = async (refereeId, data) => {
-  const referee = await db.referees.findOne({ where: {refereeId}});
+  const referee = await db.referees.findOne({ where: { refereeId } });
   if (!referee) {
     throw new ApiError(httpStatus.NOT_FOUND, "Referee not found");
   }
@@ -367,7 +372,7 @@ const updateRefereeById = async (refereeId, data) => {
 };
 
 const deleteRefereeById = async (refereeId) => {
-  const referee = await db.referees.findOne({ where: {refereeId}});
+  const referee = await db.referees.findOne({ where: { refereeId } });
   if (!referee) {
     throw new ApiError(httpStatus.NOT_FOUND, "Referee not found");
   }
@@ -379,12 +384,155 @@ const deleteRefereeById = async (refereeId) => {
   return referee;
 };
 
+/** 
+Get All New Employees by app admin
+*/
+
+const getAllNewEmployees = async (id, filter, options) => {
+  const user = await db.users.findOne({ where: { id } });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const defaultOptions = {
+    limit: parseInt(options.limit) || 10,
+    offset:
+      ((parseInt(options.page) || 1) - 1) * (parseInt(options.limit) || 10),
+    order: [["createdAt", "DESC"]],
+  };
+
+  const combinedOptions = {
+    ...defaultOptions,
+    ...options,
+  };
+
+  if (filter.status === "new") {
+    combinedOptions.limit = 20;
+
+    const employees = await db.users.findAndCountAll({
+      include: {
+        model: db.employees,
+        as: "employee",
+      },
+      ...combinedOptions,
+    });
+    if (!employees) {
+      throw new ApiError(httpStatus.NOT_FOUND, "employees not found");
+    }
+  
+    return employees;
+  }
+};
+
+const adminGetAllEmployeeData = async (id, employeeId) => {
+  const user = await db.users.findOne({ where: { id } });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  // Fetch employee data
+  const employee = await db.employees.findOne({
+    where: { id: employeeId },
+    include: [
+      {
+        model: db.users,
+      },
+      db.cv,
+      db.referees,
+      db.rightToWork,
+      db.empHistory,
+    ],
+  });
+
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Employee not found");
+  }
+
+  return employee;
+};
+
+const getAllEmployees = async (id) => {
+  const user = await db.users.findOne({ where: { id } });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employees = await db.employees.findAndCountAll({
+    include: {
+      model: db.users,
+    },
+  });
+
+  if (!employees) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employees not found");
+  }
+
+  return employees;
+};
+
+const getApprovedEmployees = async (id) => {
+  const user = await db.users.findOne({ where: { id } });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employees = await db.employees.findAll({
+    where: {
+      verification: "verified",
+    },
+    include: { model: db.users },
+  });
+
+  if (!employees) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No approved employees not found");
+  }
+
+  return employees;
+};
+
+const getAnApprovedEmployee = async (id, employeeId) => {
+  const user = await db.users.findOne({ where: { id } });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employees = await db.employees.findOne({
+    where: {
+      id: employeeId,
+      verification: "verified",
+    },
+    include: { model: db.users },
+  });
+  if (!employees) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No approved employees not found");
+  }
+
+  return employees;
+};
+const deleteAnApprovedEmployee = async (id, employeeId) => {
+  const user = await db.users.findOne({ where: { id } });
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employees = await db.employees.destroy({
+    where: {
+      id: employeeId,
+      verification: "verified",
+    },
+    include: { model: db.users },
+  });
+  if (!employees) {
+    throw new ApiError(httpStatus.NOT_FOUND, "No approved employees not found, Can't delete");
+  }
+
+  return employees;
+};
 
 module.exports = {
   createEmployee,
   updateEmployee,
   getAllEmployeeData,
-  getEmployeeByUserId,
   addEmpHistory,
   getHistoryById,
   getHistoryByAnEmployee,
@@ -408,5 +556,10 @@ module.exports = {
   getRtwByAnEmployee,
   getRtwById,
   deleteRtwById,
-
+  getAllNewEmployees,
+  adminGetAllEmployeeData,
+  getAllEmployees,
+  getApprovedEmployees,
+  getAnApprovedEmployee,
+  deleteAnApprovedEmployee,
 };

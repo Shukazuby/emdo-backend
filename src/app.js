@@ -15,6 +15,8 @@ const { db } = require('./models');
 const cloudinary = require('cloudinary').v2;
 const { cloudinaryConfig } = require('./config/cloudinary');
 const configPath = require("./config/config");
+const io = require('socket.io')
+
 
 const app = express();
 cloudinaryConfig()
@@ -36,12 +38,7 @@ app.use(express.urlencoded({ extended: true }));
 // sanitize request data
 app.use(xss());
 
-// cloudinary.config({
-//   cloud_name: configPath.cloudinary.cloudName,
-//   api_key: configPath.cloudinary.apiKey,
-//   api_secret: configPath.cloudinary.apiSecret,
-// });
-
+// app.use(io)
 // enable cors
 app.use(cors());
 app.options('*', cors());

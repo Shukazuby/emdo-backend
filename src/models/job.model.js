@@ -21,10 +21,10 @@ module.exports = (sequelize,dataType)=>{
           hourlyPay: {
             type: dataType.STRING,
           },
-          // status: {
-          //   type: dataType.ENUM('new', 'ongoing', 'completed'),
-          //   defaultValue: 'ongoing'
-          // }
+          status: {
+            type: dataType.ENUM('active', 'ongoing', 'completed', 'cancelled'),
+            defaultValue: 'active'
+          }
     })
     
     return job

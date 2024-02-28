@@ -3,6 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 const ApiError = require("../utils/ApiError");
 // const { generateOtp } = require("../utils/helper");
 const { employeeService } = require("../services");
+const pick = require("../utils/pick");
 
 const updateEmployee = catchAsync(async (req, res) => {
   const employee = await employeeService.updateEmployee(
@@ -166,10 +167,10 @@ const deleteCv = catchAsync(async (req, res) => {
   await employeeService.deleteCvById(cvId);
   res.status(httpStatus.NO_CONTENT).send();
 });
+
 /**
  * Employee Right to Work Controller
  */
-
 
 const addRtw = catchAsync(async (req, res) => {
   const { id } = req.user;
@@ -267,31 +268,46 @@ const deleteReferee = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const getAllNewEmployees = catchAsync(async (req, res) => {
+  const filter = pick(req.query, [ 'status']);
+  const options = pick(req.query, ['limit', 'page', 'order' ]);
+  const result = await employeeService.getAllNewEmployees(req.user.id, filter, options);
+  res.send({message: 'new employees', result});
+});
+
+const adminGetAllEmployeeData = catchAsync(async (req, res) => {
+  const employee= await employeeService.adminGetAllEmployeeData(req.user.id, req.params.employeeId);
+  res.status(httpStatus.OK).send(employee);
+});
+
+
+const getAllEmployees = catchAsync(async(req,res)=>{
+  const employee = await employeeService.getAllEmployees(req.user.id)
+  res.status(httpStatus.OK).send(employee)
+});
+
+const getApprovedEmployees = catchAsync(async(req,res)=>{
+  const employee = await employeeService.getApprovedEmployees(req.user.id)
+  res.status(httpStatus.OK).send(employee)
+})
+
+const getAnApprovedEmployee = catchAsync(async(req,res)=>{
+  const employee = await employeeService.getAnApprovedEmployee(req.user.id, req.params.employeeId)
+  res.status(httpStatus.OK).send(employee)
+})
+const deleteAnApprovedEmployee = catchAsync(async(req,res)=>{
+  const employee = await employeeService.deleteAnApprovedEmployee(req.user.id, req.params.employeeId)
+  res.status(httpStatus.OK).send({message: employee})
+})
+
+
 module.exports = {
-  updateEmployee,
-  getEmployeeByUserId,
-  addEmpHistory,
-  getEmpHistory,
-  getHistoryByAnEmployee,
-  updateHistory,
-  deleteHistory,
-  addEmpCert,
-  getCert,
-  getCertByAnEmployee,
-  updateCert,
-  deleteCert,
-  addReferee,
-  getCert,
-  getRefereeByAnEmployee,
-  updateReferee,
-  deleteReferee,
-  getReferee,
-  addCv,
-  getCv,
-  getCvByAnEmployee,
-  deleteCv,
-  addRtw,
-  getRtw,
-  getRtwByAnEmployee,
-  deleteRtw,
+  updateEmployee, getEmployeeByUserId, addEmpHistory,
+  getEmpHistory, getHistoryByAnEmployee, updateHistory,
+  deleteHistory, addEmpCert, getCert, getCertByAnEmployee,
+  updateCert, deleteCert, addReferee, getCert, getRefereeByAnEmployee,
+  updateReferee, deleteReferee, getReferee, addCv, getCv, getCvByAnEmployee,
+  deleteCv, addRtw, getRtw, getRtwByAnEmployee, deleteRtw, getAllNewEmployees,
+  adminGetAllEmployeeData, getAllEmployees, getApprovedEmployees, getAnApprovedEmployee,
+  deleteAnApprovedEmployee
 };

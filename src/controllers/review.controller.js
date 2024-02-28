@@ -24,12 +24,24 @@ const getReviews = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).send(review);
   });
 
+  const getAllReviewsByAdmin = catchAsync(async (req, res) => {
+    const reviews = await reviewService.getAllReviewsByAdmin(req.user.id);
+    res.status(httpStatus.OK).send(reviews);
+  });
+  
 
 
+  const getEmployeeAllReviewsByAdmin = catchAsync(async (req, res) => {
+    const reviews= await reviewService.getEmployeeAllReviewsByAdmin(req.user.id, req.params.employeeId);
+    res.status(httpStatus.OK).send(reviews);
+  });
+  
 
 
 module.exports = {
 addReview,
 getReviewByEmployee,
-getReviews
+getReviews,
+getAllReviewsByAdmin,
+getEmployeeAllReviewsByAdmin,
 }

@@ -33,6 +33,11 @@ db.reviews = require("./review.model")(sequelizeInstance, Sequelize);
 db.plans = require("./plan.model")(sequelizeInstance, Sequelize);
 db.payment = require("./payment.model")(sequelizeInstance, Sequelize);
 db.subscription = require("./subscription.model")(sequelizeInstance, Sequelize);
+db.messages = require("./message.model")(sequelizeInstance, Sequelize);
+db.notifications = require("./notification.model")(sequelizeInstance, Sequelize);
+db.admins = require("./admin.model")(sequelizeInstance, Sequelize);
+db.newAdmins = require("./newAdmin.model")(sequelizeInstance, Sequelize);
+db.bookmarks = require("./bookmark.model")(sequelizeInstance, Sequelize);
 
 // Relationships For Models
 
@@ -44,7 +49,17 @@ db.employers.belongsTo(db.users);
 db.users.hasOne(db.employees);
 db.employees.belongsTo(db.users);
 
+db.users.hasOne(db.admins);
+db.admins.belongsTo(db.users);
+
+db.users.hasOne(db.newAdmins);
+db.newAdmins.belongsTo(db.users);
+
 // One-to-Many Relationship
+db.admins.hasMany(db.newAdmins);
+db.newAdmins.belongsTo(db.admins);
+
+
 db.employers.hasMany(db.jobs);
 db.jobs.belongsTo(db.employers);
 
@@ -75,6 +90,9 @@ db.rightToWork.belongsTo(db.employees);
 db.employees.belongsToMany(db.jobs,{ through: db.jobApply, as: 'appliedJobs'} )
 db.jobs.belongsToMany(db.employees,{through: db.jobApply, as:'application'})
 
+db.employees.belongsToMany(db.jobs, { through: db.bookmarks, as: 'bookmarkedJobs' });
+db.jobs.belongsToMany(db.employees, { through: db.bookmarks, as: 'bookmarkedBy' });
+
 db.employees.hasMany(db.jobApply);
 db.jobApply.belongsTo(db.employees);
 
@@ -96,7 +114,19 @@ db.subscription.belongsTo(db.employees);
 db.plans.hasMany(db.subscription)
 db.subscription.belongsTo(db.plans)
 
-// db.employees.belongsToMany(db.jobs, { through: db.jobApply, as: 'appliedJobs' });
+db.users.hasMany(db.messages)
+db.messages.belongsTo(db.users)
+
+db.users.hasMany(db.notifications)
+db.notifications.belongsTo(db.users)
+
+db.employees.hasMany(db.bookmarks);
+db.bookmarks.belongsTo(db.employees);
+
+db.jobs.hasMany(db.bookmarks);
+db.bookmarks.belongsTo(db.jobs);
+
+// // db.employees.belongsToMany(db.jobs, { through: db.jobApply, as: 'appliedJobs' });
 
 // Many-to-many Relationship
 

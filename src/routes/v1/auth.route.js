@@ -1,20 +1,23 @@
 const express = require('express');
 const authController = require('../../controllers/auth.controller');
 const { multerUploads } = require('../../config/multer');
+const auth = require('../../middlewares/auth');
 
 
 const router = express.Router();
 
 router.post('/employers/register', multerUploads, authController.createEmployer);
 router.post('/employees/register', multerUploads, authController.createEmployee);
+router.post('/admin/register', authController.createAdmin);
 router.post('/login', authController.login);
 router.post('/reset',authController.resetPassword);
 router.post('/forget',authController.forgotPassword);
 router.post('/verify',authController.verifyEmail);
+router.post('/verify/employee/:employeeId', auth('verifyEmployee'), authController.verifyEmployee);
+router.post('/verify/employer/:employerId', auth('verifyEmployer'), authController.verifyEmployer);
 
 
 module.exports = router;
-
 /**
  * @swagger
  * tags:

@@ -1,10 +1,15 @@
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-
+const { Server } = require('socket.io');
+const socketServer = require('./config/socket');
+const cron = require('./config/cron');
+cron
 const server = app.listen(config.port, () => {
   logger.info(`Listening to port ${config.port}`);
 });
+
+socketServer(server)
 
 const exitHandler = () => {
   if (server) {
@@ -31,3 +36,6 @@ process.on('SIGTERM', () => {
     server.close();
   }
 });
+
+
+module.exports = server

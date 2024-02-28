@@ -6,16 +6,29 @@ const auth = require('../../middlewares/auth');
 const router = express.Router()
 
 router.post('/post', auth('postJobs'), jobController.createJob)
+router.post('/bookmark/:jobId', auth(), jobController.bookmarkJob)
+router.get('/bookmark/:jobId', auth(), jobController.getABookmarkedJob)
+router.get('/bookmark/job/all', auth(), jobController.getBookmarkedJobs)
 router.get('/new', jobController.newStatus)
 router.get('/status',  jobController.getJobs)
 router.get('/ongoing',  jobController.ongoingStatus)
 router.get('/complete',  jobController.completeStatus)
 router.get('/employer', auth(), jobController.getJobsByAnEmployer);
-router.get('/:jobId', auth(),jobController.getJob);
+router.get('/all/jobs', auth('getAllJobs'), jobController.getAllJobs);
+router.get('/active/jobs', auth('getAllJobs'), jobController.getActiveJobs);
+router.get('/cancelled/jobs', auth('getAllJobs'), jobController.getCancelledJobs);
+router.get('/completed/jobs', auth('getAllJobs'), jobController.getCompletedJobs);
+router.get('/active/employer/:employerId', auth('getAllJobs'), jobController.getActiveJobsByEmployerId);
+router.get('/cancelled/employer/:employerId', auth('getAllJobs'), jobController.getCancelledJobsByEmployerId);
+router.get('/completed/employer/:employerId', auth('getAllJobs'), jobController.getCompletedJobsByEmployerId);
+router.get('/active/employee/:employeeId', auth('getAllJobs'), jobController.getActiveJobsByEmployeeId);
+router.get('/cancelled/employee/:employeeId', auth('getAllJobs'), jobController.getCancelledJobsByEmployeeId);
+router.get('/completed/employee/:employeeId', auth('getAllJobs'), jobController.getCompletedJobsByEmployeeId);
+router.get('/:jobId', auth(), jobController.getJob);
 router.get('/filters/all', jobController.allFilter)
 router.patch('/:jobId', auth(),  jobController.updateJob)
 router.delete('/:jobId', auth(), jobController.deleteJob);
-
+router.delete('/bookmark/:jobId', auth(), jobController.deleteABookmarkedJob)
 
 module.exports = router
 
@@ -141,7 +154,7 @@ module.exports = router
 
 /**
  * @swagger
- * /jobs/completed:
+ * /jobs/complete:
  *   get:
  *     summary: Get filtered completed jobs
  *     description: 
@@ -186,7 +199,6 @@ module.exports = router
  *       "404":
  *         $ref: '#/components/responses/NotFound'
  */
-
 
 /**
  * @swagger
@@ -413,4 +425,61 @@ module.exports = router
  *       "403":
  *         $ref: '#/components/responses/Forbidden'
  */
+
+/**
+ * @swagger
+ * /jobs/status:
+ *   get:
+ *     summary: Get jobs based on status
+ *     description: Retrieve jobs.
+ *     tags: [jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: status new
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         default: 10
+ *         description: Maximum number of jobs
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 status:
+ *                   type: string
+ *                   example: new
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ */
+
 

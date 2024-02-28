@@ -4,17 +4,8 @@ const { db } = require("../models");
 const { userService, tokenService, emailService } = require("../services");
 const bcrypt = require("bcryptjs");
 
-/**
- * creates a subject
- * @param {Object} addUserBody
- * @returns {Promise<Object>}
- */
 const addNewUser = async (id, addUserBody) => {
-  const user = await db.users.findOne({
-    where: {
-      id,
-    },
-  });
+  const user = await db.users.findOne({where:{ id }});
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, "user not found");
   }
@@ -44,12 +35,10 @@ const addNewUser = async (id, addUserBody) => {
 };
 
 const updateUser = async (updateBody, id) => {
-  const user = await db.users.findOne({
-    where: {
-      id,
-    },
-  });
-
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
   updateBody.password = bcrypt.hashSync(updateBody.password, 8);
 
   await db.users.update(updateBody, {
@@ -71,6 +60,10 @@ const updateUser = async (updateBody, id) => {
       userId: user.id,
     },
   });
+  if (!employer) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employer not found");
+  }
+
   const updateNewUser = await db.teamManagers.update(updateBody, {
     where: {
       userId: employer.id,

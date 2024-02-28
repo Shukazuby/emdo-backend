@@ -12,6 +12,11 @@ module.exports = (sequelize, dataType) => {
       type: dataType.INTEGER,
       trim: true,
     },
+    verification: {
+      type: dataType.ENUM('verified', 'rejected', 'pending'),
+      defaultValue: 'pending',
+      trim: true,
+    },
 
 
   });

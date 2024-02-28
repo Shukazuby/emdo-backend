@@ -5,24 +5,44 @@ const { userService } = require("./user.service");
 const config = require("../config/config");
 const stripe = require("stripe")(config.stripe.stripeKey);
 const moment = require('moment')
-const plans = async (planBody) => {
+
+const plans = async (id, planBody) => {
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
   const plans = await db.plans.create(planBody);
   return plans;
 };
 
 // const [basicMonth, basicYear,standardMonth, standardYear, ]= ['price_1OjG5qGNmK4WG3L77CSJOMPC','price_1OjG4AGNmK4WG3L7aH49kRYt', 'price_1OjG5FGNmK4WG3L7bmiOrkU7', 'price_1OjG6NGNmK4WG3L7gFkHxool' ]
 
+// {
+  // "basicMonth": "price_1OjG5qGNmK4WG3L77CSJOMPC"
+  // "basicYear": "price_1OjG4AGNmK4WG3L7aH49kRYt"
+  // "standardMonth": "price_1OjG5FGNmK4WG3L7bmiOrkU7"
+  // "standardYear": "price_1OjG6NGNmK4WG3L7gFkHxool"
+
+// }
+
 const subscribe = async (id, planBody) => {
-  const employee = await db.employees.findOne({
-    where: {
-      userId: id,
-    },
-  });
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const employee = await db.employees.findOne({where:{ userId: user.id }});
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
   const plan = await db.plans.findOne({
     where: {
       id: planBody,
     },
   });
+  if (!plan) {
+    throw new ApiError(httpStatus.NOT_FOUND, "plan not found");
+  }
 
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -108,9 +128,120 @@ const verifyPayment = async (sessionId) => {
   }
 };
 
+const getPayments = async(id)=>{
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+  const payments = await db.subscription.findAll({
+    include:[
+      { model: db.plans},
+      { model: db.employees,
+        include: {model: db.users}},
+    ]
+  })
+  if (!payments) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Payments not found");
+  }
+  return payments
+}
+
+const getPaymentsByEmployeeId = async(id, employeeId)=>{
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+
+  const payments = await db.subscription.findAll({
+    where:{employeeId: employeeId},
+    include:[
+      { model: db.plans},
+      { model: db.employees,
+      include: {model: db.users}},
+  ]
+  })
+  if (!payments) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Payments not found");
+  }
+
+  return payments
+}
+
+const getPaymentsById = async(id, paymentId)=>{
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+  const payments = await db.subscription.findOne({
+    where:{id: paymentId},
+    include:[
+      { model: db.plans},
+      { model: db.employees,
+      include: {model: db.users}},
+  ]
+  })
+  if (!payments) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+  return payments
+}
+
+const getAllPaymentsByEmployee = async(id)=>{
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+  const employee = await db.employees.findOne({where:{userId: user.id}});
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
+
+  const payments = await db.subscription.findAll({
+    where:{employeeId: employee.id},
+    include:[
+      { model: db.plans},
+      { model: db.employees,
+      include: {model: db.users}},
+  ]
+  });
+  if (!payments) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Payments not found");
+  }
+
+  return payments
+}
+
+const getAPaymentByEmployee = async(id, paymentId)=>{
+  const user = await db.users.findOne({where:{ id }});
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "user not found");
+  }
+  const employee = await db.employees.findOne({where:{userId: user.id}});
+  if (!employee) {
+    throw new ApiError(httpStatus.NOT_FOUND, "employee not found");
+  }
+
+  const payments = await db.subscription.findOne({
+    where:{id: paymentId, employeeId: employee.id},
+    include:[
+      { model: db.plans},
+      { model: db.employees,
+      include: {model: db.users}},
+  ]
+  });
+  if (!payments) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Payment not found");
+  }
+  return payments
+}
 
 module.exports = {
   plans,
   subscribe,
   verifyPayment,
+  getPayments,
+  getPaymentsByEmployeeId,
+  getPaymentsById,
+  getAllPaymentsByEmployee,
+  getAPaymentByEmployee,
 };

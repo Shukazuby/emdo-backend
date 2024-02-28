@@ -1,7 +1,6 @@
 const httpStatus = require("http-status");
 const catchAsync = require("../utils/catchAsync");
 const ApiError = require("../utils/ApiError");
-// const { generateOtp } = require("../utils/helper");
 const {
   authService,
   userService,
@@ -9,8 +8,25 @@ const {
   emailService,
   employerService,
   employeeService,
+  adminService,
 } = require("../services");
 const { db } = require("../models");
+const pick = require("../utils/pick");
+
+const createAdmin = catchAsync(async (req, res) => {
+  const user = await userService.createUser("admin", req.body);
+  const admin = await adminService.createAdmin(user.id, req.body);
+  // const verifyEmailToken = await tokenService.generateVerifyEmailToken(
+  //   user.dataValues
+  // );
+  // await emailService.sendVerificationEmail(user.email, verifyEmailToken);
+
+  res.status(httpStatus.CREATED).send({
+    message: "admin registered successfully",
+    user: user,
+    admin,
+  });
+});
 
 const createEmployer = catchAsync(async (req, res) => {
   const user = await userService.createUser("employer", req.body);
@@ -150,13 +166,26 @@ const verifyEmail = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send("Email has been verified");
 });
 
+const verifyEmployee = catchAsync(async (req, res) => {
+  const verify = await authService.verifyEmployee(req.user.id, req.params.employeeId, req.query.data);
+  res.status(httpStatus.OK).send(verify);
+});
+const verifyEmployer = catchAsync(async (req, res) => {
+  const verify = await authService.verifyEmployer(req.user.id, req.params.employerId, req.query.data);
+  res.status(httpStatus.OK).send(verify);
+});
+
 module.exports = {
   createEmployer,
   createEmployee,
+  createAdmin,
   login,
   forgotPassword,
   resetPassword,
   verifyEmail,
   loginAdmin,
-  loginStandard
+  loginStandard,
+  verifyEmployee,
+  verifyEmployer,
+
 };

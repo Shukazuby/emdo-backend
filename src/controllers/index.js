@@ -6,3 +6,5 @@ module.exports.employeeController = require("./employee.controller");
 module.exports.jobApplyController = require("./jobApply.controller");
 module.exports.reviewController = require("./review.controller");
 module.exports.planController = require("./plan.controller");
+module.exports.messageController = require("./message.controller");
+module.exports.adminController = require("./admin.controller");
